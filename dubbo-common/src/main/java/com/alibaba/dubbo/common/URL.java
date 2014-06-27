@@ -37,6 +37,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 
 /**
  * URL - Uniform Resource Locator (Immutable, ThreadSafe)
+ *       一致的资源定位 （不可更改的，线程安全的）
  * <p>
  * url example:
  * <ul>
@@ -157,6 +158,7 @@ public final class URL implements Serializable {
 		this.port = (port < 0 ? 0 : port);
 		this.path = path;
 		// trim the beginning "/"
+		//wuzl 这段代码是不是有问题?
 		while(path != null && path.startsWith("/")) {
 		    path = path.substring(1);
 		}
@@ -165,12 +167,13 @@ public final class URL implements Serializable {
 		} else {
 		    parameters = new HashMap<String, String>(parameters);
 		}
+		//设置为只读
 		this.parameters = Collections.unmodifiableMap(parameters);
 	}
 
     /**
      * Parse url string
-     * 
+     * 解析字符串为url对象
      * @param url URL string
      * @return URL instance
      * @see URL
@@ -188,8 +191,10 @@ public final class URL implements Serializable {
         Map<String, String> parameters = null;
         int i = url.indexOf("?"); // seperator between body and parameters 
         if (i >= 0) {
+        	//wuzl 切出url参数部分
             String[] parts = url.substring(i + 1).split("\\&");
             parameters = new HashMap<String, String>();
+            //wuzl 解析url的参数 1如果有=号（=前边没有字符串key为空，否则key为=号前的字符串），value为等号后的字符串2如果没有=号key和value都为该字符串
             for (String part : parts) {
                 part = part.trim();
                 if (part.length() > 0) {
@@ -201,15 +206,18 @@ public final class URL implements Serializable {
                     }
                 }
             }
+          //wuzl url变成取出参数部分的url
             url = url.substring(0, i);
         }
         i = url.indexOf("://");
         if (i >= 0) {
+        	 //wuzl 取出protocol协议 剩余部分继续走
             if(i == 0) throw new IllegalStateException("url missing protocol: \"" + url + "\"");
             protocol = url.substring(0, i);
             url = url.substring(i + 3);
         }
         else {
+        	 //wuzl 取出protocol协议 剩余部分继续走
             // case: file:/path/to/file.txt
             i = url.indexOf(":/");
             if(i>=0) {
@@ -236,6 +244,7 @@ public final class URL implements Serializable {
         }
         i = url.indexOf(":");
         if (i >= 0 && i < url.length() - 1) {
+        	//wuzl没有错误判断？此处应该加入判断，或者在输入端验证格式
             port = Integer.parseInt(url.substring(i + 1));
             url = url.substring(0, i);
         }
@@ -254,7 +263,10 @@ public final class URL implements Serializable {
 	public String getPassword() {
 		return password;
 	}
-	
+	/**
+	 * wuzl：这个方法有忽略 初始化方法里 如果有password一定会有username的这个方法判断有问题 但不影响
+	 * @return
+	 */
 	public String getAuthority() {
 	    if ((username == null || username.length() == 0)
 	            && (password == null || password.length() == 0)) {
@@ -301,7 +313,11 @@ public final class URL implements Serializable {
 	public String getBackupAddress() {
 		return getBackupAddress(0);
 	}
-	
+	/**
+	 * 获取备用地址
+	 * @param defaultPort
+	 * @return
+	 */
 	public String getBackupAddress(int defaultPort) {
 		StringBuilder address = new StringBuilder(appendDefaultPort(getAddress(), defaultPort));
         String[] backups = getParameter(Constants.BACKUP_KEY, new String[0]);
@@ -313,7 +329,12 @@ public final class URL implements Serializable {
         }
         return address.toString();
 	}
-	
+	/**
+	 * 获取所有可用的url
+	 * 第一个是本身
+	 * 其他是备用地址 除ip和端口外其他配置都是本身的
+	 * @return
+	 */
 	public List<URL> getBackupUrls() {
 		List<URL> urls = new ArrayList<URL>();
 		urls.add(this);
@@ -361,7 +382,11 @@ public final class URL implements Serializable {
     public URL setPassword(String password) {
         return new URL(protocol, username, password, host, port, path, getParameters());
     }
-    
+    /**
+     * 以自身为模板生辰给一个新的url对象 只有ip和port（没有用当前）会更改
+     * @param address
+     * @return
+     */
     public URL setAddress(String address) {
         int i = address.lastIndexOf(':');
         String host;
@@ -382,7 +407,6 @@ public final class URL implements Serializable {
     public URL setPort(int port) {
         return new URL(protocol, username, password, host, port, path, getParameters());
     }
-
     public URL setPath(String path) {
         return new URL(protocol, username, password, host, port, path, getParameters());
     }
@@ -414,7 +438,12 @@ public final class URL implements Serializable {
         }
         return value;
     }
-
+    /**
+     * 从参数中获取某个key的value，然后用，正则分割成数组返回
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     public String[] getParameter(String key, String[] defaultValue) {
         String value = getParameter(key);
         if (value == null || value.length() == 0) {
