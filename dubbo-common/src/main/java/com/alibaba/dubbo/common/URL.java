@@ -158,7 +158,6 @@ public final class URL implements Serializable {
 		this.port = (port < 0 ? 0 : port);
 		this.path = path;
 		// trim the beginning "/"
-		//wuzl 这段代码是不是有问题?
 		while(path != null && path.startsWith("/")) {
 		    path = path.substring(1);
 		}

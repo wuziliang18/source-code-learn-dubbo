@@ -17,7 +17,7 @@ package com.alibaba.dubbo.common.extension;
 
 /**
  * ExtensionFactory
- * 
+ * 扩展点本身的加载容器，可从不同容器加载扩展点。
  * @author william.liangf
  * @export
  */

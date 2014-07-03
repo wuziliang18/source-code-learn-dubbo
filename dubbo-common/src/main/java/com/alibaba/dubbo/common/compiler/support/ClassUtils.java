@@ -30,7 +30,8 @@ import java.util.Map;
 
 /**
  * ClassUtils. (Tool, Static, ThreadSafe)
- * 
+ * 使用大量的重载和链式及类的操作方法
+ * 链式可以用方法链和错误链
  * @author william.liangf
  */
 public class ClassUtils {
@@ -38,7 +39,11 @@ public class ClassUtils {
     public static final String CLASS_EXTENSION = ".class";
 
     public static final String JAVA_EXTENSION = ".java";
-
+    /**
+     * 生成对象
+     * @param name
+     * @return
+     */
     public static Object newInstance(String name) {
         try {
             return forName(name).newInstance();
@@ -48,11 +53,18 @@ public class ClassUtils {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-    
+    /**
+     * 从基本类型和指定的包下找类
+     * @param packages
+     * @param className
+     * @return
+     */
     public static Class<?> forName(String[] packages, String className)  {
         try {
+        	//从基本类型和java。lang中查找
             return _forName(className);
         } catch (ClassNotFoundException e) {
+        	//如果类没有找到 从packages中查找
             if (packages != null && packages.length > 0) {
                 for (String pkg : packages) {
                     try {
@@ -61,10 +73,15 @@ public class ClassUtils {
                     }
                 }
             }
+            //最后没有找到抛异常
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-    
+    /**
+     * 直接查找和java.lang下查找，只找基本类型的和数组
+     * @param className
+     * @return
+     */
     public static Class<?> forName(String className) {
         try {
             return _forName(className);
@@ -109,6 +126,7 @@ public class ClassUtils {
         try {
             return arrayForName(className);
         } catch (ClassNotFoundException e) {
+        	//如果类没有找到 尝试从java.lang包下加载
             if (className.indexOf('.') == -1) { // 尝试java.lang包
                 try {
                     return arrayForName("java.lang." + className);
@@ -119,13 +137,20 @@ public class ClassUtils {
             throw e;
         }
     }
-    
+    /**
+     * 生成class对象 如果是数组返回class数组
+     * @param className
+     * @return
+     * @throws ClassNotFoundException
+     */
     private static Class<?> arrayForName(String className) throws ClassNotFoundException {
         return Class.forName(className.endsWith("[]")
                 ? "[L" + className.substring(0, className.length() - 2) + ";"
                         : className, true, Thread.currentThread().getContextClassLoader());
     }
-    
+    /*
+     * 获取类型的封转类型 只针对基本类型
+     */
     public static Class<?> getBoxedClass(Class<?> type) {
         if (type == boolean.class) {
             return Boolean.class; 
@@ -219,7 +244,11 @@ public class ClassUtils {
     public static Object unboxed(Object v) {
         return v;
     }
-    
+    /**
+     * 判断长度是否大于0 只有map collection list之类
+     * @param object
+     * @return
+     */
     public static boolean isNotEmpty(Object object) {
         return getSize(object) > 0;
     }
@@ -249,9 +278,15 @@ public class ClassUtils {
     public static Class<?> getGenericClass(Class<?> cls) {
         return getGenericClass(cls, 0);
     }
-
+    /**
+     * 获得超类的泛型参数的实际类型
+     * @param cls
+     * @param i
+     * @return
+     */
     public static Class<?> getGenericClass(Class<?> cls, int i) {
         try {
+        	//getGenericSuperclass返回表示此 Class 所表示的实体（类、接口、基本类型或 void）的直接超类的 Type
             ParameterizedType parameterizedType = ((ParameterizedType) cls.getGenericInterfaces()[0]);
             Object genericClass = parameterizedType.getActualTypeArguments()[i];
             if (genericClass instanceof ParameterizedType) { // 处理多级泛型
@@ -303,7 +338,11 @@ public class ClassUtils {
             System.err.println("The template bytecode too long, may be affect the JIT compiler. template class: " + name);
         }
     }
-    
+    /**
+     * 用异常机制迭代获取size的方法
+     * @param cls
+     * @return
+     */
     public static String getSizeMethod(Class<?> cls) {
         try {
             return cls.getMethod("size", new Class<?>[0]).getName() + "()";
@@ -323,13 +362,20 @@ public class ClassUtils {
             }
         }
     }
-    
+    /**
+     * 返回一个方法的默认调用格式 参数用默认值
+     * 循环似乎没有用到呢
+     * @param method
+     * @param parameterClasses
+     * @param rightCode
+     * @return
+     */
     public static String getMethodName(Method method, Class<?>[] parameterClasses, String rightCode) {
         if (method.getParameterTypes().length > parameterClasses.length) {
             Class<?>[] types = method.getParameterTypes();
             StringBuilder buf = new StringBuilder(rightCode);
             for (int i = parameterClasses.length; i < types.length; i ++) {
-                if (buf.length() > 0) {
+                if (buf.length() > 0) {//很巧妙！！！xuexi了
                     buf.append(",");
                 }
                 Class<?> type = types[i];
@@ -369,7 +415,7 @@ public class ClassUtils {
                         Class<?>[] types = method.getParameterTypes();
                         boolean match = true;
                         for (int i = 0; i < parameterTypes.length; i ++) {
-                            if (! types[i].isAssignableFrom(parameterTypes[i])) {
+                            if (! types[i].isAssignableFrom(parameterTypes[i])) {//如果参数类型是传入参数类型的父类也是通过验证
                                 match = false;
                                 break;
                             }
@@ -384,7 +430,11 @@ public class ClassUtils {
             throw e;
         }
     }
-    
+    /**
+     * 获取对象的默认值
+     * @param type
+     * @return
+     */
     public static String getInitCode(Class<?> type) {
         if (byte.class.equals(type)
                 || short.class.equals(type)
@@ -413,5 +463,4 @@ public class ClassUtils {
     }
 
     private ClassUtils() {}
-
 }

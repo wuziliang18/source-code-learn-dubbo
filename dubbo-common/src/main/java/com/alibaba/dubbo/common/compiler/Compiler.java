@@ -20,7 +20,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * Compiler. (SPI, Singleton, ThreadSafe)
- * 
+ * spi配置的缺省扩展点是javassist
  * @author william.liangf
  */
 @SPI("javassist")
