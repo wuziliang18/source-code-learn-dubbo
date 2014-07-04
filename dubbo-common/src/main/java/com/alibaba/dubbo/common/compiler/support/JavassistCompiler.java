@@ -33,7 +33,7 @@ import javassist.LoaderClassPath;
 
 /**
  * JavassistCompiler. (SPI, Singleton, ThreadSafe)
- * 
+ * dubbo的compiler扩展点的默认实现哟 使用了模板方法
  * @author william.liangf
  */
 public class JavassistCompiler extends AbstractCompiler {
@@ -44,8 +44,8 @@ public class JavassistCompiler extends AbstractCompiler {
 
     private static final Pattern IMPLEMENTS_PATTERN = Pattern.compile("\\s+implements\\s+([\\w\\.]+)\\s*\\{\n");
     
-    private static final Pattern METHODS_PATTERN = Pattern.compile("\n(private|public|protected)\\s+");
 
+    private static final Pattern METHODS_PATTERN = Pattern.compile("\n(private|public|protected)\\s+");
     private static final Pattern FIELD_PATTERN = Pattern.compile("[^\n]+=[^\n]+;");
 
     @Override
@@ -55,12 +55,13 @@ public class JavassistCompiler extends AbstractCompiler {
         ClassPool pool = new ClassPool(true);
         pool.appendClassPath(new LoaderClassPath(ClassHelper.getCallerClassLoader(getClass())));
         Matcher matcher = IMPORT_PATTERN.matcher(source);
-        List<String> importPackages = new ArrayList<String>();
-        Map<String, String> fullNames = new HashMap<String, String>();
+        List<String> importPackages = new ArrayList<String>();//保存引入的包名 似乎没有去从
+        Map<String, String> fullNames = new HashMap<String, String>();//保存完成类与对象的map
+        /*1.引入包加入到classpool中*/
         while (matcher.find()) {
-            String pkg = matcher.group(1);
+            String pkg = matcher.group(1);//引入的类路径或者包+*
             if (pkg.endsWith(".*")) {
-                String pkgName = pkg.substring(0, pkg.length() - 2);
+                String pkgName = pkg.substring(0, pkg.length() - 2);//如果是.*获取包名
                 pool.importPackage(pkgName);
                 importPackages.add(pkgName);
             } else {
@@ -76,21 +77,23 @@ public class JavassistCompiler extends AbstractCompiler {
         String[] packages = importPackages.toArray(new String[0]);
         matcher = EXTENDS_PATTERN.matcher(source);
         CtClass cls;
+        /*2处理可能存在的父类 ,新创建一个class 空的*/
         if (matcher.find()) {
             String extend = matcher.group(1).trim();
             String extendClass;
             if (extend.contains(".")) {
-                extendClass = extend;
+                extendClass = extend;//如果继承时写的是全路径
             } else if (fullNames.containsKey(extend)) {
-                extendClass = fullNames.get(extend);
+                extendClass = fullNames.get(extend);//如果在引入时候能找到
             } else {
-                extendClass = ClassUtils.forName(packages, extend).getName();
+                extendClass = ClassUtils.forName(packages, extend).getName();//在制定包下查找
             }
-            cls = pool.makeClass(name, pool.get(extendClass));
+            cls = pool.makeClass(name, pool.get(extendClass));//生成新的class 
         } else {
-            cls = pool.makeClass(name);
+            cls = pool.makeClass(name);//生成新的class 
         }
         matcher = IMPLEMENTS_PATTERN.matcher(source);
+        /*3.处理实现的接口*/
         if (matcher.find()) {
             String[] ifaces = matcher.group(1).trim().split("\\,");
             for (String iface : ifaces) {
@@ -106,17 +109,18 @@ public class JavassistCompiler extends AbstractCompiler {
                 cls.addInterface(pool.get(ifaceClass));
             }
         }
-        String body = source.substring(source.indexOf("{") + 1, source.length() - 1);
-        String[] methods = METHODS_PATTERN.split(body);
+        /*4.处理真正的源码*/
+        String body = source.substring(source.indexOf("{") + 1, source.length() - 1);//获取代码主体
+        String[] methods = METHODS_PATTERN.split(body);//很不错的一个切分
         for (String method : methods) {
             method = method.trim();
-            if (method.length() > 0) {
+            if (method.length() > 0) {//多余的判断--不多于可能防止第一个为空的
                 if (method.startsWith(className)) {
-                    cls.addConstructor(CtNewConstructor.make("public " + method, cls));
+                    cls.addConstructor(CtNewConstructor.make("public " + method, cls));//构造函数
                 } else if (FIELD_PATTERN.matcher(method).matches()) {
-                    cls.addField(CtField.make("private " + method, cls));
+                    cls.addField(CtField.make("private " + method, cls));//参数 都私有
                 } else {
-                    cls.addMethod(CtNewMethod.make("public " + method, cls));
+                    cls.addMethod(CtNewMethod.make("public " + method, cls));//方法 公有
                 }
             }
         }

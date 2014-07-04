@@ -65,7 +65,7 @@ public class JdkCompiler extends AbstractCompiler {
     
     private final JavaFileManagerImpl javaFileManager;
 
-    private volatile List<String> options;
+    private volatile List<String> options;//jdk配置项
 
     public JdkCompiler(){
         options = new ArrayList<String>();

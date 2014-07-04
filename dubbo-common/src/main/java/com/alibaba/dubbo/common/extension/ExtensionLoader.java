@@ -325,7 +325,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
-     * 返回指定名字的扩展。如果指定名字的扩展不存在，则抛异常 {@link IllegalStateException}.
+     * 返回指定名字的扩展实现类。如果指定名字的扩展不存在，则抛异常 {@link IllegalStateException}.
      *
      * @param name
      * @return

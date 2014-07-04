@@ -22,7 +22,7 @@ import com.alibaba.dubbo.common.extension.ExtensionLoader;
 
 /**
  * AdaptiveCompiler. (SPI, Singleton, ThreadSafe)
- * 
+ * Compiler的适配 如果没有设置DEFAULT_COMPILER 则使用spi的默认扩展实现也就是javassist
  * @author william.liangf
  */
 @Adaptive

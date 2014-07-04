@@ -36,6 +36,7 @@ public abstract class AbstractCompiler implements Compiler {
         code = code.trim();
         Matcher matcher = PACKAGE_PATTERN.matcher(code);
         String pkg;
+        /*1.获取包名 可能为空字符串*/
         if (matcher.find()) {
             pkg = matcher.group(1);
         } else {
@@ -43,19 +44,24 @@ public abstract class AbstractCompiler implements Compiler {
         }
         matcher = CLASS_PATTERN.matcher(code);
         String cls;
+        /*2.获取类名，不允许为空*/
         if (matcher.find()) {
             cls = matcher.group(1);
         } else {
             throw new IllegalArgumentException("No such class name in " + code);
         }
+        /*3.拼接完整类名包含包名*/
         String className = pkg != null && pkg.length() > 0 ? pkg + "." + cls : cls;
         try {
+        	/*4.加载返回类 从现有的类加载中 此处可以防止二次加载*/
             return Class.forName(className, true, ClassHelper.getCallerClassLoader(getClass()));
         } catch (ClassNotFoundException e) {
-            if (! code.endsWith("}")) {
+        	/*5.当前了类加载器找不到 则生成class并加载*/
+            if (! code.endsWith("}")) {//一个简单的校验
                 throw new IllegalStateException("The java code not endsWith \"}\", code: \n" + code + "\n");
             }
             try {
+            	/*6.调用模板方法去生成加载类*/
                 return doCompile(className, code);
             } catch (RuntimeException t) {
                 throw t;
@@ -64,7 +70,13 @@ public abstract class AbstractCompiler implements Compiler {
             }
         }
     }
-    
+    /**
+     * 模板方法
+     * @param name
+     * @param source
+     * @return
+     * @throws Throwable
+     */
     protected abstract Class<?> doCompile(String name, String source) throws Throwable;
 
 }
