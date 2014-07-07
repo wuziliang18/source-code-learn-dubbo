@@ -52,13 +52,13 @@ import com.alibaba.dubbo.common.utils.ClassHelper;
 
 /**
  * JdkCompiler. (SPI, Singleton, ThreadSafe)
- * 
+ * JavaFileManager在 Java™ 编程语言源和类文件之上进行操作的工具的文件管理器。
  * @author william.liangf
  */
 public class JdkCompiler extends AbstractCompiler {
 
     private final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
+    //保存编译错误信息
     private final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
     
     private final ClassLoaderImpl classLoader;
@@ -78,14 +78,15 @@ public class JdkCompiler extends AbstractCompiler {
             try {
                 URLClassLoader urlClassLoader = (URLClassLoader) loader;
                 List<File> files = new ArrayList<File>();
-                for (URL url : urlClassLoader.getURLs()) {
+                for (URL url : urlClassLoader.getURLs()) {//获取所有加载的jar和环境
                     files.add(new File(url.getFile()));
                 }
-                manager.setLocation(StandardLocation.CLASS_PATH, files);
+                manager.setLocation(StandardLocation.CLASS_PATH, files);//设置classpath
             } catch (IOException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
         }
+        //AccessController.doPrivileged作用是标记是特权的,不用做权限检查
         classLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoaderImpl>() {
             public ClassLoaderImpl run() {
                 return new ClassLoaderImpl(loader);
@@ -109,42 +110,55 @@ public class JdkCompiler extends AbstractCompiler {
         }
         return classLoader.loadClass(name);
     }
-    
+    /**
+     * 重写classloader
+     * @author wuzl
+     *
+     */
     private final class ClassLoaderImpl extends ClassLoader {
-        
+        //保存class的一个对应 最为缓存
         private final Map<String, JavaFileObject> classes = new HashMap<String, JavaFileObject>();
 
         ClassLoaderImpl(final ClassLoader parentClassLoader) {
             super(parentClassLoader);
         }
-
+        
         Collection<JavaFileObject> files() {
             return Collections.unmodifiableCollection(classes.values());
         }
-
+        /**
+         * 重写findclass
+         * 先读缓存 找不到去加载简单类型或者在classloader中查找
+         */
         @Override
         protected Class<?> findClass(final String qualifiedClassName) throws ClassNotFoundException {
             JavaFileObject file = classes.get(qualifiedClassName);
             if (file != null) {
                 byte[] bytes = ((JavaFileObjectImpl) file).getByteCode();
-                return defineClass(qualifiedClassName, bytes, 0, bytes.length);
+                return defineClass(qualifiedClassName, bytes, 0, bytes.length);//一样调用父类的
             }
             try {
                 return ClassHelper.forNameWithCallerClassLoader(qualifiedClassName, getClass());
             } catch (ClassNotFoundException nf) {
-                return super.findClass(qualifiedClassName);
+                return super.findClass(qualifiedClassName);//否则直接调用父类的查找方法
             }
         }
-
+        /**
+         * 添加一个javaFileObject给findclass使用 
+         * @param qualifiedClassName
+         * @param javaFile
+         */
         void add(final String qualifiedClassName, final JavaFileObject javaFile) {
             classes.put(qualifiedClassName, javaFile);
         }
 
         @Override
         protected synchronized Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-            return super.loadClass(name, resolve);
+            return super.loadClass(name, resolve);//只是调用父类的 
         }
-
+        /**
+         * 重写getResourceAsStream 如果缓存中有直接返回 否则调用父类
+         */
         @Override
         public InputStream getResourceAsStream(final String name) {
             if (name.endsWith(ClassUtils.CLASS_EXTENSION)) {
@@ -157,7 +171,11 @@ public class JdkCompiler extends AbstractCompiler {
             return super.getResourceAsStream(name);
         }
     }
-    
+    /**
+     * SimpleJavaFileObject 为 JavaFileObject 中的大多数方法提供简单实现
+     * @author wuzl
+     *
+     */
     private static final class JavaFileObjectImpl extends SimpleJavaFileObject {
 
         private ByteArrayOutputStream bytecode;
@@ -201,10 +219,14 @@ public class JdkCompiler extends AbstractCompiler {
             return bytecode.toByteArray();
         }
     }
-    
+    /**
+     * 将调用转发到给定的文件管理器似乎是缓存编译对象 
+     * @author wuzl
+     *
+     */
     private static final class JavaFileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
         
-        private final ClassLoaderImpl classLoader;
+        private final ClassLoaderImpl classLoader;//保存 
 
         private final Map<URI, JavaFileObject> fileObjects = new HashMap<URI, JavaFileObject>();
 
@@ -253,7 +275,7 @@ public class JdkCompiler extends AbstractCompiler {
         public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse)
                 throws IOException {
             Iterable<JavaFileObject> result = super.list(location, packageName, kinds, recurse);
-
+            /*下边的代码似乎没用 */
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             List<URL> urlList = new ArrayList<URL>();
             Enumeration<URL> e = contextClassLoader.getResources("com");
