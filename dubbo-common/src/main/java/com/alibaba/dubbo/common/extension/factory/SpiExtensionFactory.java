@@ -25,12 +25,18 @@ import com.alibaba.dubbo.common.extension.SPI;
  * @author william.liangf
  */
 public class SpiExtensionFactory implements ExtensionFactory {
-
+	/**
+     * Get extension.
+     * 获取一个扩展点
+     * @param type object type.必须是扩展点接口
+     * @param name object name. 这个参数似乎没用到
+     * @return object instance.
+     */
     public <T> T getExtension(Class<T> type, String name) {
-        if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
+        if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {//必须是扩展点接口
             ExtensionLoader<T> loader = ExtensionLoader.getExtensionLoader(type);
             if (loader.getSupportedExtensions().size() > 0) {
-                return loader.getAdaptiveExtension();
+                return loader.getAdaptiveExtension();//返回的是扩展点的适配器对象
             }
         }
         return null;
