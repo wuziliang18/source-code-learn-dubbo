@@ -31,7 +31,7 @@ import com.alibaba.dubbo.common.utils.IOUtils;
 
 /**
  * CodecUtils.
- * 
+ * & 0xFF 必须要有 否则值会不正确
  * @author qian.lei
  */
 
@@ -49,7 +49,7 @@ public class Bytes
 
 	/**
 	 * byte array copy.
-	 * 
+	 * btye数组复制
 	 * @param src src.
 	 * @param length new length.
 	 * @return new byte array.
@@ -63,7 +63,7 @@ public class Bytes
 
 	/**
 	 * to byte array.
-	 * 
+	 * 把一个short类型转换成一个byte数组
 	 * @param v value.
 	 * @return byte[].
 	 */
@@ -87,7 +87,7 @@ public class Bytes
 
 	/**
 	 * to byte array.
-	 * 
+	 * 把short分解成byte数组 可以指定起始位置
 	 * @param v value.
 	 * @param b byte array.
 	 */
@@ -123,7 +123,7 @@ public class Bytes
 
 	/**
 	 * to byte array.
-	 * 
+	 * int类型转byte数组
 	 * @param v value.
 	 * @param b byte array.
 	 * @param off array offset.
