@@ -93,7 +93,9 @@ public class UnsafeByteArrayInputStream extends InputStream
 	{
 		mMark = mPosition;
 	}
-
+	/**
+	 * 回滚当前点为标志位 如果没有mark 则回到初始化的值默认为0
+	 */
 	public void reset()
 	{
 		mPosition = mMark;

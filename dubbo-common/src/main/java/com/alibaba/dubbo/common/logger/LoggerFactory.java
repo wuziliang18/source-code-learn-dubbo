@@ -37,11 +37,13 @@ public class LoggerFactory {
 	private LoggerFactory() {
 	}
 
-	private static volatile LoggerAdapter LOGGER_ADAPTER;
-	
+	private static volatile LoggerAdapter LOGGER_ADAPTER;//日志输出器供给器
+	//缓存每个用到日志类的日志输出器 不包括LoggerFactory
 	private static final ConcurrentMap<String, FailsafeLogger> LOGGERS = new ConcurrentHashMap<String, FailsafeLogger>();
 
 	// 查找常用的日志框架
+	//没有配置 循环判断哪个可以使用
+	//根据一个配置来加载 感觉没有用扩展点加载好
 	static {
 	    String logger = System.getProperty("dubbo.application.logger");
 	    if ("slf4j".equals(logger)) {
@@ -68,7 +70,12 @@ public class LoggerFactory {
             }
     	}
 	}
-	
+	/**
+	 * 用扩展点方法设置当前日志输出提供器
+	 * 个人感觉此处才有用
+	 * 但运行时候调用 会有很多额外操作 会更改所有缓存的日志输出器
+	 * @param loggerAdapter
+	 */
 	public static void setLoggerAdapter(String loggerAdapter) {
 	    if (loggerAdapter != null && loggerAdapter.length() > 0) {
 	        setLoggerAdapter(ExtensionLoader.getExtensionLoader(LoggerAdapter.class).getExtension(loggerAdapter));
@@ -83,10 +90,11 @@ public class LoggerFactory {
 	 */
 	public static void setLoggerAdapter(LoggerAdapter loggerAdapter) {
 		if (loggerAdapter != null) {
+			//下边两句没那么复杂 只是打印了日志 
 			Logger logger = loggerAdapter.getLogger(LoggerFactory.class.getName());
 			logger.info("using logger: " + loggerAdapter.getClass().getName());
 			LoggerFactory.LOGGER_ADAPTER = loggerAdapter;
-			for (Map.Entry<String, FailsafeLogger> entry : LOGGERS.entrySet()) {
+			for (Map.Entry<String, FailsafeLogger> entry : LOGGERS.entrySet()) {//如果是中途个更改日志输出供给器 要更改所有的日志输出器
 				entry.getValue().setLogger(LOGGER_ADAPTER.getLogger(entry.getKey()));
 			}
 		}
