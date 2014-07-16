@@ -39,7 +39,7 @@ public class GenericDataInput implements DataInput, GenericDataFlags
 
 	private final byte[] mBuffer;
 
-	private int mRead = 0;
+	private int mRead = 0;//读取出来的字节数
 
 	private int mPosition = 0;
 
@@ -74,7 +74,7 @@ public class GenericDataInput implements DataInput, GenericDataFlags
 		switch( b )
 		{
 			case VARINT8:
-				return read0();
+				return read0();//读取到0继续读
 			case VARINT_0: return 0; case VARINT_1: return 1; case VARINT_2: return 2; case VARINT_3: return 3;
 			case VARINT_4: return 4; case VARINT_5: return 5; case VARINT_6: return 6; case VARINT_7: return 7;
 			case VARINT_8: return 8; case VARINT_9: return 9; case VARINT_A: return 10; case VARINT_B: return 11;
@@ -202,6 +202,7 @@ public class GenericDataInput implements DataInput, GenericDataFlags
 
 	protected byte read0() throws IOException
 	{
+		//如果没有加载或者加载的byte【】已经读取完毕 加载到byte【】重置mPosition mRead
 		if( mPosition == mRead )
 			fillBuffer();
 
@@ -244,7 +245,7 @@ public class GenericDataInput implements DataInput, GenericDataFlags
 		switch( b )
 		{
 			case VARINT8:
-				return read0();
+				return read0();//继续读
 			case VARINT16:
 			{
 				byte b1 = read0(), b2 = read0();
@@ -380,7 +381,9 @@ public class GenericDataInput implements DataInput, GenericDataFlags
 				throw new IOException("Tag error, expect VARINT, but get " + b);
 		}
 	}
-
+	/*
+	 * 从input中读取到byte【】
+	 */
 	private void fillBuffer() throws IOException
 	{
 		mPosition = 0;

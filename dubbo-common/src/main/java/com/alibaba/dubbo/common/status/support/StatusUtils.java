@@ -22,7 +22,7 @@ import com.alibaba.dubbo.common.status.Status.Level;
 
 /**
  * StatusManager
- * 
+ * 汇总statu
  * @author william.liangf
  */
 public class StatusUtils {

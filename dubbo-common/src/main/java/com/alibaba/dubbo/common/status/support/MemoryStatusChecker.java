@@ -21,7 +21,7 @@ import com.alibaba.dubbo.common.status.StatusChecker;
 
 /**
  * MemoryStatus
- * 
+ * 自动激活的内存检查
  * @author william.liangf
  */
 @Activate

@@ -34,7 +34,7 @@ import com.alibaba.fastjson.JSON;
  */
 public class FastJsonObjectInput implements ObjectInput {
 
-    private final BufferedReader reader;
+    private final BufferedReader reader;//为了逐行读取
 
     public FastJsonObjectInput(InputStream in){
         this(new InputStreamReader(in));

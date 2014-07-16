@@ -25,7 +25,7 @@ import com.alibaba.dubbo.common.status.StatusChecker;
 
 /**
  * Load Status
- * 
+ * 自动加载的检查cpu
  * @author william.liangf
  */
 @Activate
@@ -40,7 +40,7 @@ public class LoadStatusChecker implements StatusChecker {
     	} catch (Throwable e) {
     	    load = -1;
     	}
-    	int cpu = operatingSystemMXBean.getAvailableProcessors();
+    	int cpu = operatingSystemMXBean.getAvailableProcessors();//返回 Java 虚拟机可以使用的处理器数目
         return new Status(load < 0 ? Status.Level.UNKNOWN : (load < cpu ? Status.Level.OK : Status.Level.WARN), (load < 0 ? "" : "load:" + load + ",") + "cpu:" + cpu);
     }
 
