@@ -26,15 +26,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class NamedThreadFactory implements ThreadFactory
 {
-	private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);
+	private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);//为了区分多个没有设置连接池名字的一个字段 自增长安全
 
-	private final AtomicInteger mThreadNum = new AtomicInteger(1);
+	private final AtomicInteger mThreadNum = new AtomicInteger(1);// 区分每个县城 自增长安全
 
 	private final String mPrefix;
 
-	private final boolean mDaemo;
+	private final boolean mDaemo;//线程是否后台运行
 
-	private final ThreadGroup mGroup;
+	private final ThreadGroup mGroup;//线程组
 
 	public NamedThreadFactory()
 	{
@@ -51,13 +51,13 @@ public class NamedThreadFactory implements ThreadFactory
 		mPrefix = prefix + "-thread-";
 		mDaemo = daemo;
         SecurityManager s = System.getSecurityManager();
-        mGroup = ( s == null ) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
+        mGroup = ( s == null ) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();//保存线程组到变量
 	}
 
 	public Thread newThread(Runnable runnable)
 	{
 		String name = mPrefix + mThreadNum.getAndIncrement();
-        Thread ret = new Thread(mGroup,runnable,name,0);
+        Thread ret = new Thread(mGroup,runnable,name,0);//新创建一个线程 初始化包含组
         ret.setDaemon(mDaemo);
         return ret;
 	}

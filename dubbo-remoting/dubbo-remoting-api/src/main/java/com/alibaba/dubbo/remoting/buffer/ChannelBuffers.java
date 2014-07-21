@@ -87,7 +87,7 @@ public final class ChannelBuffers {
 
         ChannelBuffer buffer = new ByteBufferBackedChannelBuffer(
             ByteBuffer.allocateDirect(capacity));
-        buffer.clear();
+        buffer.clear();//因为没有写入数据所有要clear下 writer为0
         return buffer;
     }
 

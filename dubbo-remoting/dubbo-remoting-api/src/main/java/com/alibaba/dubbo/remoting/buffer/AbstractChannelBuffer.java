@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
  */
 public abstract class AbstractChannelBuffer implements ChannelBuffer {
 
-    private int readerIndex;
+    private int readerIndex;//读取指针 随着读增长 不可以大于wirteindex getBytes不影响readerIndex
 
     private int writerIndex;
 
@@ -89,7 +89,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
     }
 
     public void resetReaderIndex() {
-        readerIndex(markedReaderIndex);
+        readerIndex(markedReaderIndex);//不能直接回滚 因为要考虑writerIndex发生变化
     }
 
     public void markWriterIndex() {
@@ -99,18 +99,22 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
     public void resetWriterIndex() {
         writerIndex = markedWriterIndex;
     }
-
+    /**
+     * 丢弃已经读取的，剩余写的数据前移
+     */
     public void discardReadBytes() {
         if (readerIndex == 0) {
             return;
         }
-        setBytes(0, this, readerIndex, writerIndex - readerIndex);
-        writerIndex -= readerIndex;
-        markedReaderIndex = Math.max(markedReaderIndex - readerIndex, 0);
-        markedWriterIndex = Math.max(markedWriterIndex - readerIndex, 0);
+        setBytes(0, this, readerIndex, writerIndex - readerIndex);//模板方法 把之前的数据抛弃 剩余数据写进来
+        writerIndex -= readerIndex;//写的数据index变为剩余的数据条
+        markedReaderIndex = Math.max(markedReaderIndex - readerIndex, 0);//操作数据要记得mark
+        markedWriterIndex = Math.max(markedWriterIndex - readerIndex, 0);//操作数据要记得mark
         readerIndex = 0;
     }
-
+    /**
+     * 确认是否还可以写入指定数据长度
+     */
     public void ensureWritableBytes(int writableBytes) {
         if (writableBytes > writableBytes()) {
             throw new IndexOutOfBoundsException();
@@ -148,7 +152,9 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         setBytes(index, src, src.readerIndex(), length);
         src.readerIndex(src.readerIndex() + length);
     }
-
+    /**
+     * 真正的读取方法 
+     */
     public byte readByte() {
         if (readerIndex == writerIndex) {
             throw new IndexOutOfBoundsException();
@@ -161,7 +167,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         if (length == 0) {
             return ChannelBuffers.EMPTY_BUFFER;
         }
-        ChannelBuffer buf = factory().getBuffer(length);
+        ChannelBuffer buf = factory().getBuffer(length);//从chanel工厂中获取一个channel
         buf.writeBytes(this, readerIndex, length);
         readerIndex += length;
         return buf;

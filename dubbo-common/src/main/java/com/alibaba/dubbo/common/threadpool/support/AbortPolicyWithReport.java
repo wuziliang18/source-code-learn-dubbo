@@ -25,7 +25,8 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 /**
  * Abort Policy.
  * Log warn info when abort.
- * 
+ * 重写线程池的中断策略 封装下错误信息
+ * 用于被拒绝任务的处理程序，它将抛出 RejectedExecutionException.
  * @author ding.lid
  */
 public class AbortPolicyWithReport extends ThreadPoolExecutor.AbortPolicy {

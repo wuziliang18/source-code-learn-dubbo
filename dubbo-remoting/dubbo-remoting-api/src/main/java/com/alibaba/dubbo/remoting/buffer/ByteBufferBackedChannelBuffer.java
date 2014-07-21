@@ -36,9 +36,9 @@ public class ByteBufferBackedChannelBuffer extends AbstractChannelBuffer {
             throw new NullPointerException("buffer");
         }
 
-        this.buffer = buffer.slice();
-        capacity = buffer.remaining();
-        writerIndex(capacity);
+        this.buffer = buffer.slice();//缓冲区分片 缓冲区份片数据共享 为buffer的position到limit的数据
+        capacity = buffer.remaining();//buffer的position到limit的长度
+        writerIndex(capacity);//已经写入那么多数据
     }
 
     private ByteBufferBackedChannelBuffer(ByteBufferBackedChannelBuffer buffer) {
@@ -84,7 +84,7 @@ public class ByteBufferBackedChannelBuffer extends AbstractChannelBuffer {
 
     @Override
     public void getBytes(int index, byte[] dst, int dstIndex, int length) {
-        ByteBuffer data = buffer.duplicate();
+        ByteBuffer data = buffer.duplicate();//复制数据 防止数据冲突
         try {
             data.limit(index + length).position(index);
         } catch (IllegalArgumentException e) {
