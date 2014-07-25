@@ -78,7 +78,7 @@ public class Constants {
 
     public static final String  DEFAULT_PROXY                      = "javassist";
 
-    public static final int     DEFAULT_PAYLOAD                    = 8 * 1024 * 1024;                      // 8M
+    public static final int     DEFAULT_PAYLOAD                    = 8 * 1024 * 1024;                      // 8M有效负荷
 
     public static final String  DEFAULT_CLUSTER                    = "failover";
 

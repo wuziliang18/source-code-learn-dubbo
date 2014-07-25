@@ -34,7 +34,7 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
 public class WrappedChannelHandler implements ChannelHandlerDelegate {
     
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);
-
+    //初始化线程池
     protected static final ExecutorService SHARED_EXECUTOR = Executors.newCachedThreadPool(new NamedThreadFactory("DubboSharedHandler", true));
     
     protected final ExecutorService executor;
@@ -46,6 +46,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
     public WrappedChannelHandler(ChannelHandler handler, URL url) {
         this.handler = handler;
         this.url = url;
+        //从扩展实现中初始化线程池
         executor = (ExecutorService) ExtensionLoader.getExtensionLoader(ThreadPool.class).getAdaptiveExtension().getExecutor(url);
 
         String componentKey = Constants.EXECUTOR_SERVICE_COMPONENT_KEY;

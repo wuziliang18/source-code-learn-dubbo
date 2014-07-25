@@ -26,14 +26,14 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
 
 /**
  * ChannelListenerDispatcher
- * 
+ * ChannelHandler的调度器 对所有的ChannelHandler都循环调用 容错
  * @author william.liangf
  */
 public class ChannelHandlerDispatcher implements ChannelHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelHandlerDispatcher.class);
 
-    private final Collection<ChannelHandler> channelHandlers = new CopyOnWriteArraySet<ChannelHandler>();
+    private final Collection<ChannelHandler> channelHandlers = new CopyOnWriteArraySet<ChannelHandler>();//缓存ChannelHandler
     
     public ChannelHandlerDispatcher() {
     }

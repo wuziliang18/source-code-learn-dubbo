@@ -20,15 +20,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
  * @see com.alibaba.dubbo.remoting.transport.MultiMessageHandler
  */
 public final class MultiMessage implements Iterable {
-
+	/**
+	 * 生成一个MultiMessage 用collection的数据添加进去
+	 * @param collection
+	 * @return
+	 */
     public static MultiMessage createFromCollection(Collection collection) {
         MultiMessage result = new MultiMessage();
         result.addMessages(collection);
@@ -80,5 +86,16 @@ public final class MultiMessage implements Iterable {
     public Iterator iterator() {
         return messages.iterator();
     }
-
+    public static void main(String[] args) {
+    	List first=new ArrayList();
+		Map<String,String> dto=new HashMap<String,String>();
+		dto.put("a", "1");
+		first.add(dto);
+		dto=new HashMap<String,String>();
+		dto.put("b", "2");
+		first.add(dto);
+		MultiMessage message=createFromCollection(first);
+		Collection sec=message.removeMessages();
+		System.out.println(sec);//为空
+	}
 }

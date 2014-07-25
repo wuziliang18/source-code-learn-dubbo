@@ -16,7 +16,9 @@ public abstract class AbstractChannelHandlerDelegate implements ChannelHandlerDe
         Assert.notNull(handler, "handler == null");
         this.handler = handler;
     }
-
+    /**
+     * 获取channelhandler 如果当前保存的是ChannelHandlerDelegate要递归调用否则直接返回保存的
+     */
     public ChannelHandler getHandler() {
         if (handler instanceof ChannelHandlerDelegate) {
             return ((ChannelHandlerDelegate)handler).getHandler();

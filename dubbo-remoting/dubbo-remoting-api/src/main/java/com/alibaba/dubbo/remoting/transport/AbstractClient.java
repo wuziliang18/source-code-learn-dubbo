@@ -57,16 +57,16 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     private static final AtomicInteger CLIENT_THREAD_POOL_ID = new AtomicInteger();
 
     private final Lock            connectLock = new ReentrantLock();
-    
+    //可以定时执行任务的线程池 两个线程
     private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("DubboClientReconnectTimer", true));
-    
+    //ScheduledExecutorService中提交了任务的返回结果
     private volatile  ScheduledFuture<?> reconnectExecutorFuture = null;
     
     protected volatile ExecutorService executor;
     
     private final boolean send_reconnect ;
     
-    private final AtomicInteger reconnect_count = new AtomicInteger(0);
+    private final AtomicInteger reconnect_count = new AtomicInteger(0);//保存重连次数 如果成功归零
     
     //重连的error日志是否已经被调用过.
     private final AtomicBoolean reconnect_error_log_flag = new AtomicBoolean(false) ;
@@ -133,12 +133,14 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     
     /**
      * init reconnect thread
+     * 线程池中运行一个不断重连的线程
      */
     private synchronized void initConnectStatusCheckCommand(){
         //reconnect=false to close reconnect 
         int reconnect = getReconnectParam(getUrl());
+        //如果有重连时间 也就是url中reconnect!=false 并且没有运行重连进程运行
         if(reconnect > 0 && (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled())){
-            Runnable connectStatusCheckCommand =  new Runnable() {
+            Runnable connectStatusCheckCommand =  new Runnable() {//这个线程监听连接 如果断了调用方法去重连 否则只是记录最后连接时间
                 public void run() {
                     try {
                         if (! isConnected()) {
@@ -149,7 +151,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
                     } catch (Throwable t) { 
                         String errorMsg = "client reconnect to "+getUrl().getAddress()+" find error . url: "+ getUrl();
                         // wait registry sync provider list
-                        if (System.currentTimeMillis() - lastConnectedTime > shutdown_timeout){
+                        if (System.currentTimeMillis() - lastConnectedTime > shutdown_timeout){//最后一次连接超时
                             if (!reconnect_error_log_flag.get()){
                                 reconnect_error_log_flag.set(true);
                                 logger.error(errorMsg, t);
@@ -167,6 +169,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     }
     
     /**
+     * 获取重连时间频率 如果url中没有为默认的 如果为false为0 设置为数字则为该值
      * @param url
      * @return 0-false
      */
@@ -276,8 +279,8 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
             if (isConnected()) {
                 return;
             }
-            initConnectStatusCheckCommand();
-            doConnect();
+            initConnectStatusCheckCommand();//委托这个方法里的线程池来维护
+            doConnect();//应该是具体的连接操作 模板方法
             if (! isConnected()) {
                 throw new RemotingException(this, "Failed connect to server " + getRemoteAddress() + " from " + getClass().getSimpleName() + " "
                                             + NetUtils.getLocalHost() + " using dubbo version " + Version.getVersion()
@@ -289,7 +292,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
                                             + ", channel is " + this.getChannel());
             	}
             }
-            reconnect_count.set(0);
+            reconnect_count.set(0);//连接成功后归零
             reconnect_error_log_flag.set(false);
         } catch (RemotingException e) {
             throw e;

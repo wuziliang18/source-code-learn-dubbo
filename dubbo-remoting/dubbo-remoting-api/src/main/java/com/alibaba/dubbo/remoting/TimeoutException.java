@@ -33,7 +33,7 @@ public class TimeoutException extends RemotingException {
     
     public static final int SERVER_SIDE = 1;
 
-    private final int       phase;
+    private final int       phase;//区分服务端还是客户端
 
     public TimeoutException(boolean serverSide, Channel channel, String message){
         super(channel, message);

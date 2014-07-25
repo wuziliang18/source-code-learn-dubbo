@@ -37,7 +37,7 @@ public interface Transporter {
 
     /**
      * Bind a server.
-     * 
+     * 用与服务端
      * @see com.alibaba.dubbo.remoting.Transporters#bind(URL, Receiver, ChannelHandler)
      * @param url server url
      * @param handler
@@ -49,7 +49,7 @@ public interface Transporter {
 
     /**
      * Connect to a server.
-     * 
+     * 用于客户端
      * @see com.alibaba.dubbo.remoting.Transporters#connect(URL, Receiver, ChannelListener)
      * @param url server url
      * @param handler

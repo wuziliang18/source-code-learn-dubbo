@@ -23,7 +23,7 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.all.AllDispatcher;
 
 /**
  * ChannelHandlerWrapper (SPI, Singleton, ThreadSafe)
- * 
+ * 通道信息派发器，用于指定线程池模型
  * @author chao.liuc
  */
 @SPI(AllDispatcher.NAME)

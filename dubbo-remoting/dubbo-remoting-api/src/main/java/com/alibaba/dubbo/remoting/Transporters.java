@@ -23,7 +23,7 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * Transporter facade. (API, Static, ThreadSafe)
- * 
+ * 根绝url 调用Transporter适配器选择合适的Transporter进行bind和connect
  * @author william.liangf
  */
 public class Transporters {
@@ -43,7 +43,7 @@ public class Transporters {
         if (handlers.length == 1) {
             handler = handlers[0];
         } else {
-            handler = new ChannelHandlerDispatcher(handlers);
+            handler = new ChannelHandlerDispatcher(handlers);//调度器包装 为了可以调用每一个ChannelHandler里的方法
         }
         return getTransporter().bind(url, handler);
     }

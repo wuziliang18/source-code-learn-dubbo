@@ -47,12 +47,15 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
         this.timeout = url.getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
         this.connectTimeout = url.getPositiveParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT);
     }
-
+    /**
+     * 根据url重置
+     */
     public void reset(URL url) {
         if (isClosed()) {
             throw new IllegalStateException("Failed to reset parameters "
                                         + url + ", cause: Channel closed. channel: " + getLocalAddress());
         }
+        //从url中获取信息 如果有覆盖初始化时的各个参数
         try {
             if (url.hasParameter(Constants.HEARTBEAT_KEY)) {
                 int t = url.getParameter(Constants.TIMEOUT_KEY, 0);
@@ -98,7 +101,11 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
     protected int getConnectTimeout() {
         return connectTimeout;
     }
-
+    /**
+     * 获取codec 兼容老版本
+     * @param url
+     * @return
+     */
     protected static Codec2 getChannelCodec(URL url) {
         String codecName = url.getParameter(Constants.CODEC_KEY, "telnet");
         if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {

@@ -45,6 +45,11 @@ public class ExecutorUtil {
         }
         return false;
     }
+    /**
+     *  优雅停止
+     * @param executor
+     * @param timeout
+     */
     public static void gracefulShutdown(Executor executor, int timeout) {
         if (!(executor instanceof ExecutorService) || isShutdown(executor)) {
             return;
@@ -58,7 +63,7 @@ public class ExecutorUtil {
             return ;
         }
         try {
-            if(! es.awaitTermination(timeout, TimeUnit.MILLISECONDS)) {
+            if(! es.awaitTermination(timeout, TimeUnit.MILLISECONDS)) {//用于等待子线程结束，再继续执行下面的代码
                 es.shutdownNow();
             }
         } catch (InterruptedException ex) {
@@ -69,6 +74,11 @@ public class ExecutorUtil {
             newThreadToCloseExecutor(es);
         }
     }
+    /**
+     * 立刻停止
+     * @param executor
+     * @param timeout
+     */
     public static void shutdownNow(Executor executor, final int timeout) {
         if (!(executor instanceof ExecutorService) || isShutdown(executor)) {
             return;
