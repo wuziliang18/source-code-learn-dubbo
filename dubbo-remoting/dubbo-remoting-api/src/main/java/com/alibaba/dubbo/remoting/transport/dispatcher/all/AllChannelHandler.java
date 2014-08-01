@@ -25,7 +25,11 @@ import com.alibaba.dubbo.remoting.RemotingException;
 import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelEventRunnable;
 import com.alibaba.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelEventRunnable.ChannelState;
-
+/**
+ * ChannelHandler包装类，每个调用都是放到线程池中去运行 实际的方法是包装的ChannelHandler对象
+ * @author wuzl
+ *
+ */
 public class AllChannelHandler extends WrappedChannelHandler {
     
     public AllChannelHandler(ChannelHandler handler, URL url) {
@@ -67,7 +71,11 @@ public class AllChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException("caught event", channel, getClass()+" error when process caught event ." , t);
         }
     }
-
+    /**
+     * 重写获取线程池的方法
+     * 如果有对象独自的用独自的 否则用公共的
+     * @return
+     */
     private ExecutorService getExecutorService() {
         ExecutorService cexecutor = executor;
         if (cexecutor == null || cexecutor.isShutdown()) { 

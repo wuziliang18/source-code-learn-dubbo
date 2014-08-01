@@ -36,7 +36,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);
     //初始化线程池
     protected static final ExecutorService SHARED_EXECUTOR = Executors.newCachedThreadPool(new NamedThreadFactory("DubboSharedHandler", true));
-    
+    //对象独自的线程池
     protected final ExecutorService executor;
     
     protected final ChannelHandler handler;
@@ -54,7 +54,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
             componentKey = Constants.CONSUMER_SIDE;
         }
         DataStore dataStore = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
-        dataStore.put(componentKey, Integer.toString(url.getPort()), executor);
+        dataStore.put(componentKey, Integer.toString(url.getPort()), executor);//保存起来
     }
     
     public void close() {

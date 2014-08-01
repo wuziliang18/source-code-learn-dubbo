@@ -21,7 +21,8 @@ import com.alibaba.dubbo.remoting.Dispatcher;
 
 /**
  * connect disconnect 保证顺序.
- * 
+ * ConnectionOrderedChannelHandler封装ChannelHandler 连接和关闭连接操作都放入到线程池的队列中 顺序执行
+ * 其他操作都是放入到线程池中运行
  * @author chao.liuc
  */
 public class ConnectionOrderedDispatcher implements Dispatcher {

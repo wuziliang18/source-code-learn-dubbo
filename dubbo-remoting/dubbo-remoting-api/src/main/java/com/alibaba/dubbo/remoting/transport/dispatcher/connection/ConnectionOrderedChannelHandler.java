@@ -34,7 +34,7 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelEventRunnable.Chan
 
 public class ConnectionOrderedChannelHandler extends WrappedChannelHandler {
 
-    protected final ThreadPoolExecutor connectionExecutor;
+    protected final ThreadPoolExecutor connectionExecutor;//初始化函数定义的线程池 只允许一个线程运行 其他都放入到队列中 保证顺序执行
     private final int queuewarninglimit ;
     
     public ConnectionOrderedChannelHandler(ChannelHandler handler, URL url) {
@@ -90,7 +90,9 @@ public class ConnectionOrderedChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException("caught event", channel, getClass()+" error when process caught event ." , t);
         }
     }
-    
+    /**
+     *  检查线程池的队列是否超过界限 超过warn
+     */
     private void checkQueueLength(){
         if (connectionExecutor.getQueue().size() > queuewarninglimit){
             logger.warn(new IllegalThreadStateException("connectionordered channel handler `queue size: "+connectionExecutor.getQueue().size()+" exceed the warning limit number :"+queuewarninglimit));

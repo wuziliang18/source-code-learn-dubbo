@@ -35,7 +35,11 @@ import com.alibaba.dubbo.remoting.Codec2;
 public abstract class AbstractCodec implements Codec2 {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractCodec.class);
-
+	/**
+	 * 选择合适的序列化工具
+	 * @param channel
+	 * @return
+	 */
     protected Serialization getSerialization(Channel channel) {
         return CodecSupport.getSerialization(channel.getUrl());
     }

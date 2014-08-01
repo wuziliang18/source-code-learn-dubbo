@@ -30,8 +30,8 @@ public interface TelnetHandler {
     /**
      * telnet.
      * 
-     * @param channel
-     * @param message
+     * @param channel 当前的连接
+     * @param message 输入的命令 适配后 传入具体命令的只有参数
      */
     String telnet(Channel channel, String message) throws RemotingException;
 

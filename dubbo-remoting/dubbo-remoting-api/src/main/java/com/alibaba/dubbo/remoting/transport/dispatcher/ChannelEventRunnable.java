@@ -22,7 +22,8 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
 
 /**
  * @author chao.liuc
- *
+ * ChannelHandler 操作的线程类
+ * 根据ChannelState调用合适的方法 所有异常全部吃掉 只打印日志
  */
 public class ChannelEventRunnable implements Runnable {
     private static final Logger logger             = LoggerFactory.getLogger(ChannelEventRunnable.class);

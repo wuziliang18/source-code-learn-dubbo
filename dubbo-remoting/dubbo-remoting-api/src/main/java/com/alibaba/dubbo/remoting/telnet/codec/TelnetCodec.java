@@ -47,9 +47,9 @@ public class TelnetCodec extends TransportCodec {
 
     private static final String HISTORY_INDEX_KEY = "telnet.history.index";
     
-    private static final byte[] UP = new byte[] {27, 91, 65};
+    private static final byte[] UP = new byte[] {27, 91, 65};//27 脱离 Pause break 91[ 65A
     
-    private static final byte[] DOWN = new byte[] {27, 91, 66};
+    private static final byte[] DOWN = new byte[] {27, 91, 66};//66B
 
     private static final List<?> ENTER  = Arrays.asList(new Object[] { new byte[] { '\r', '\n' } /* Windows Enter */, new byte[] { '\n' } /* Linux Enter */ });
 
@@ -76,7 +76,7 @@ public class TelnetCodec extends TransportCodec {
 
     @SuppressWarnings("unchecked")
     protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] message) throws IOException {
-        if (isClientSide(channel)) {
+        if (isClientSide(channel)) {//如果是客户端
             return toString(message, getCharset(channel));
         }
         checkPayload(channel, readable);
@@ -94,7 +94,7 @@ public class TelnetCodec extends TransportCodec {
             return DecodeResult.NEED_MORE_INPUT;
         }
         
-        for (Object command : EXIT) {
+        for (Object command : EXIT) {//循环判断是否是退出命令
             if (isEquals(message, (byte[]) command)) {
                 if (logger.isInfoEnabled()) {
                     logger.info(new Exception("Close channel " + channel + " on exit command: " + Arrays.toString((byte[])command)));
@@ -104,9 +104,9 @@ public class TelnetCodec extends TransportCodec {
             }
         }
         
-        boolean up = endsWith(message, UP);
-        boolean down = endsWith(message, DOWN);
-        if (up || down) {
+        boolean up = endsWith(message, UP);//判断是否结尾是up
+        boolean down = endsWith(message, DOWN);//判断是否结尾是down
+        if (up || down) {//如果是up或是down
             LinkedList<String> history = (LinkedList<String>) channel.getAttribute(HISTORY_LIST_KEY);
             if (history == null || history.size() == 0) {
                 return DecodeResult.NEED_MORE_INPUT;
@@ -207,7 +207,11 @@ public class TelnetCodec extends TransportCodec {
         }
         return result;
     }
-    
+    /**
+     * 获取编码方式
+     * @param channel
+     * @return
+     */
     private static Charset getCharset(Channel channel) {
         if (channel != null) {
             Object attribute = channel.getAttribute(Constants.CHARSET_KEY);
@@ -239,7 +243,13 @@ public class TelnetCodec extends TransportCodec {
         }
         return Charset.defaultCharset();
     }
-
+    /**
+     * 直接返回byte的字符串
+     * @param message
+     * @param charset
+     * @return
+     * @throws UnsupportedEncodingException
+     */
     private static String toString(byte[] message, Charset charset) throws UnsupportedEncodingException {
         byte[] copy = new byte[message.length];
         int index = 0;
@@ -249,12 +259,12 @@ public class TelnetCodec extends TransportCodec {
                 if (index > 0) {
                     index --;
                 }
-                if (i > 2 && message[i - 2] < 0) { // double byte char
+                if (i > 2 && message[i - 2] < 0) { // double byte char//如果是双字节的 要多删除一个byte
                     if (index > 0) {
                         index --;
                     }
                 }
-            } else if (b == 27) { // escape
+            } else if (b == 27) { // escape//esc键
                 if (i < message.length - 4 && message[i + 4] == 126) {
                     i = i + 4;
                 } else if (i < message.length - 3 && message[i + 3] == 126) {
@@ -268,17 +278,29 @@ public class TelnetCodec extends TransportCodec {
             } else {
                 copy[index ++] = message[i];
             }
-        }
+        }//end for
         if (index == 0) {
             return "";
         }
         return new String(copy, 0, index, charset.name()).trim();
     }
-
+    /**
+     * 判断是否相等
+     * @param message
+     * @param command
+     * @return
+     * @throws IOException
+     */
     private static boolean isEquals(byte[] message, byte[] command) throws IOException {
         return message.length == command.length && endsWith(message, command);
     }
-
+    /**
+     * 判断byte数组的最后几位是否是command的
+     * @param message
+     * @param command
+     * @return
+     * @throws IOException
+     */
     private static boolean endsWith(byte[] message, byte[] command) throws IOException {
         if (message.length < command.length) {
             return false;

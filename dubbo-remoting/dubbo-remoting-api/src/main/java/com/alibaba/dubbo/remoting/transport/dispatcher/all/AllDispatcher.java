@@ -21,7 +21,7 @@ import com.alibaba.dubbo.remoting.Dispatcher;
 
 /**
  * 默认的线程池配置
- * 
+ * 调用AllChannelHandler包装 对每个操作放到线程池中
  * @author chao.liuc
  */
 public class AllDispatcher implements Dispatcher {

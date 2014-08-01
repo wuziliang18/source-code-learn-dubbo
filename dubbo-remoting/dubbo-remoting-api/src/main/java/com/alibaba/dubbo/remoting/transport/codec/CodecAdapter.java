@@ -27,7 +27,7 @@ import com.alibaba.dubbo.remoting.Codec2;
 import com.alibaba.dubbo.remoting.buffer.ChannelBuffer;
 
 /**
- * codec适配器兼容codec
+ * codec2适配器兼容低版本的codec
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
  */
 public class CodecAdapter implements Codec2 {

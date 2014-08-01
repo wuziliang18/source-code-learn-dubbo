@@ -24,11 +24,14 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerAdapter;
 
 /**
  * @author william.liangf
+ * 适配器负责调用合适的命令没有的话提示错误
  */
 public class TelnetHandlerAdapter extends ChannelHandlerAdapter implements TelnetHandler {
 
     private final ExtensionLoader<TelnetHandler> extensionLoader = ExtensionLoader.getExtensionLoader(TelnetHandler.class);
-
+    /**
+     * 截取message 空格分割 前边的是具体命令 后边的是参数
+     */
     public String telnet(Channel channel, String message) throws RemotingException {
         String prompt = channel.getUrl().getParameterAndDecoded(Constants.PROMPT_KEY, Constants.DEFAULT_PROMPT);
         boolean noprompt = message.contains("--no-prompt");
