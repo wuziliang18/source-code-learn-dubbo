@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * Help
- * 
+ * help的注解提供给HelpTelnetHandler
  * @author william.liangf
  */
 @Documented

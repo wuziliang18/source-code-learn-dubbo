@@ -30,7 +30,7 @@ public interface Channel extends Endpoint {
 
     /**
      * get remote address.
-     * 
+     * 似乎是客户端的
      * @return remote address.
      */
     InetSocketAddress getRemoteAddress();

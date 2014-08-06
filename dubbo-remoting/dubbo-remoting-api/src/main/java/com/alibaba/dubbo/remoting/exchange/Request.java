@@ -27,11 +27,11 @@ import com.alibaba.dubbo.common.utils.StringUtils;
  */
 public class Request {
     
-    public static final String HEARTBEAT_EVENT = null;
+    public static final String HEARTBEAT_EVENT = null;//共享心跳事件
     
-    public static final String READONLY_EVENT = "R";
+    public static final String READONLY_EVENT = "R";//共享只读属性
     
-    private static final AtomicLong INVOKE_ID = new AtomicLong(0);
+    private static final AtomicLong INVOKE_ID = new AtomicLong(0);//共享id
 
     private final long    mId;
 

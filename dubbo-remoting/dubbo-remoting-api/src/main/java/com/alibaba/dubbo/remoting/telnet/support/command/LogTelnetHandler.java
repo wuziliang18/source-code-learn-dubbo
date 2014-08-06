@@ -44,14 +44,14 @@ public class LogTelnetHandler implements TelnetHandler {
 
     public String telnet(Channel channel, String message) {
         long size = 0 ;
-        File file = LoggerFactory.getFile();
+        File file = LoggerFactory.getFile();//获取日志文件
         StringBuffer buf = new StringBuffer();
-        if (message == null || message.trim().length() == 0) {
+        if (message == null || message.trim().length() == 0) {//没有参数
             buf.append("EXAMPLE: log error / log 100");
         }else {
             String str[] = message.split(" ");
             if (! StringUtils.isInteger(str[0])){
-                LoggerFactory.setLevel(Level.valueOf(message.toUpperCase()));
+                LoggerFactory.setLevel(Level.valueOf(message.toUpperCase()));//没有容错？
             } else {
                 int SHOW_LOG_LENGTH = Integer.parseInt(str[0]);
                 

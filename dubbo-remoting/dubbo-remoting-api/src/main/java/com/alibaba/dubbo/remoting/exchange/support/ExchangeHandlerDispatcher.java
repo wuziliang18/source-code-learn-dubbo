@@ -26,12 +26,12 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * ExchangeHandlerDispatcher
- * 
+ * ExchangeHandler调度器
  * @author william.liangf
  */
 public class ExchangeHandlerDispatcher implements ExchangeHandler {
 
-    private final ReplierDispatcher replierDispatcher;
+    private final ReplierDispatcher replierDispatcher;//答复者调度器
 
     private final ChannelHandlerDispatcher handlerDispatcher;
 

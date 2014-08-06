@@ -62,13 +62,20 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             channel.setAttribute(Constants.CHANNEL_ATTRIBUTE_READONLY_KEY, Boolean.TRUE);
         }
     }
-
+    /**
+     * 处理请求
+     * @param channel
+     * @param req
+     * @return
+     * @throws RemotingException
+     */
     Response handleRequest(ExchangeChannel channel, Request req) throws RemotingException {
         Response res = new Response(req.getId(), req.getVersion());
-        if (req.isBroken()) {
+        if (req.isBroken()) {//req 损坏了 直接返回错误的response信息
             Object data = req.getData();
 
             String msg;
+            //下边是解析data信息
             if (data == null) msg = null;
             else if (data instanceof Throwable) msg = StringUtils.toString((Throwable) data);
             else msg = data.toString();
@@ -80,6 +87,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         // find handler by message class.
         Object msg = req.getData();
         try {
+        	//正常的处理信息
             // handle data.
             Object result = handler.reply(channel, msg);
             res.setStatus(Response.OK);
@@ -98,8 +106,8 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
     }
 
     public void connected(Channel channel) throws RemotingException {
-        channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());
-        channel.setAttribute(KEY_WRITE_TIMESTAMP, System.currentTimeMillis());
+        channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());//刷新时间
+        channel.setAttribute(KEY_WRITE_TIMESTAMP, System.currentTimeMillis());//刷新时间
         ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
         try {
             handler.connected(exchangeChannel);
@@ -132,7 +140,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         } catch (Throwable t) {
             exception = t;
         }
-        if (message instanceof Request) {
+        if (message instanceof Request) {// 如果是request 返回成功后标记下sent
             Request request = (Request) message;
             DefaultFuture.sent(channel, request);
         }
@@ -160,7 +168,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());
         ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
         try {
-            if (message instanceof Request) {
+            if (message instanceof Request) {//如果是request 有不同的操作 
                 // handle request.
                 Request request = (Request) message;
                 if (request.isEvent()) {
@@ -173,7 +181,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         handler.received(exchangeChannel, request.getData());
                     }
                 }
-            } else if (message instanceof Response) {
+            } else if (message instanceof Response) {//如果是response 接收数据
                 handleResponse(channel, (Response) message);
             } else if (message instanceof String) {
                 if (isClientSide(channel)) {

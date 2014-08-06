@@ -92,9 +92,9 @@ public class DefaultFuture implements ResponseFuture {
             long start = System.currentTimeMillis();
             lock.lock();
             try {
-                while (! isDone()) {
-                    done.await(timeout, TimeUnit.MILLISECONDS);
-                    if (isDone() || System.currentTimeMillis() - start > timeout) {
+                while (! isDone()) {//循环等待response完成
+                    done.await(timeout, TimeUnit.MILLISECONDS);//让出资源等待唤醒	
+                    if (isDone() || System.currentTimeMillis() - start > timeout) {//直到完成或者超时
                         break;
                     }
                 }
@@ -103,7 +103,7 @@ public class DefaultFuture implements ResponseFuture {
             } finally {
                 lock.unlock();
             }
-            if (! isDone()) {
+            if (! isDone()) {// 超时 没有完成
                 throw new TimeoutException(sent > 0, channel, getTimeoutMessage(false));
             }
         }
@@ -142,6 +142,10 @@ public class DefaultFuture implements ResponseFuture {
             }
         }
     }
+    /**
+     * 回调
+     * @param c
+     */
     private void invokeCallback(ResponseCallback c){
         ResponseCallback callbackCopy = c;
         if (callbackCopy == null){
@@ -153,20 +157,20 @@ public class DefaultFuture implements ResponseFuture {
             throw new IllegalStateException("response cannot be null. url:"+channel.getUrl());
         }
         
-        if (res.getStatus() == Response.OK) {
+        if (res.getStatus() == Response.OK) {//成功后回调
             try {
                 callbackCopy.done(res.getResult());
             } catch (Exception e) {
                 logger.error("callback invoke error .reasult:" + res.getResult() + ",url:" + channel.getUrl(), e);
             }
-        } else if (res.getStatus() == Response.CLIENT_TIMEOUT || res.getStatus() == Response.SERVER_TIMEOUT) {
+        } else if (res.getStatus() == Response.CLIENT_TIMEOUT || res.getStatus() == Response.SERVER_TIMEOUT) {//超时后异常回调
             try {
                 TimeoutException te = new TimeoutException(res.getStatus() == Response.SERVER_TIMEOUT, channel, res.getErrorMessage());
                 callbackCopy.caught(te);
             } catch (Exception e) {
                 logger.error("callback invoke error ,url:" + channel.getUrl(), e);
             }
-        } else {
+        } else {//其他走异常回调
             try {
                 RuntimeException re = new RuntimeException(res.getErrorMessage());
                 callbackCopy.caught(re);
@@ -175,7 +179,12 @@ public class DefaultFuture implements ResponseFuture {
             }
         }
     }
-
+    /**
+     * 返回response中的结果 
+     * 如果不是ok状态 抛异常 
+     * @return
+     * @throws RemotingException
+     */
     private Object returnFromResponse() throws RemotingException {
         Response res = response;
         if (res == null) {
@@ -277,7 +286,10 @@ public class DefaultFuture implements ResponseFuture {
                     + timeout + " ms, request: " + request + ", channel: " + channel.getLocalAddress()
                     + " -> " + channel.getRemoteAddress();
     }
-
+    /**
+     * 后台线程监听是否超时
+     *
+     */
     private static class RemotingInvocationTimeoutScan implements Runnable {
 
         public void run() {
@@ -287,7 +299,7 @@ public class DefaultFuture implements ResponseFuture {
                         if (future == null || future.isDone()) {
                             continue;
                         }
-                        if (System.currentTimeMillis() - future.getStartTimestamp() > future.getTimeout()) {
+                        if (System.currentTimeMillis() - future.getStartTimestamp() > future.getTimeout()) {//计算运行的时间超时
                             // create exception response.
                             Response timeoutResponse = new Response(future.getId());
                             // set timeout status.

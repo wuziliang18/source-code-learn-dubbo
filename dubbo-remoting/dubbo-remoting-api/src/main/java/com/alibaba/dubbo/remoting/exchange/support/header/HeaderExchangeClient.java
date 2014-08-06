@@ -157,7 +157,9 @@ public class HeaderExchangeClient implements ExchangeClient {
     public boolean hasAttribute(String key) {
         return channel.hasAttribute(key);
     }
-
+    /**
+     * 开始心跳进程
+     */
     private void startHeatbeatTimer() {
         stopHeartbeatTimer();
         if ( heartbeat > 0 ) {
@@ -170,12 +172,14 @@ public class HeaderExchangeClient implements ExchangeClient {
                     heartbeat, heartbeat, TimeUnit.MILLISECONDS );
         }
     }
-
+    /**
+     * 停止心跳进程
+     */
     private void stopHeartbeatTimer() {
         if (heatbeatTimer != null && ! heatbeatTimer.isCancelled()) {
             try {
                 heatbeatTimer.cancel(true);
-                scheduled.purge();
+                scheduled.purge();//清楚失效任务
             } catch ( Throwable e ) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(e.getMessage(), e);

@@ -38,11 +38,11 @@ public class HelpTelnetHandler implements TelnetHandler {
 
     public String telnet(Channel channel, String message) {
         if (message.length() > 0) {
-            if (! extensionLoader.hasExtension(message)) {
+            if (! extensionLoader.hasExtension(message)) {//判断是否有这个扩展实现类
                 return "No such command " + message;
             }
             TelnetHandler handler = extensionLoader.getExtension(message);
-            Help help = handler.getClass().getAnnotation(Help.class);
+            Help help = handler.getClass().getAnnotation(Help.class);//解析注解
             StringBuilder buf = new StringBuilder();
             buf.append("Command:\r\n    ");
             buf.append(message + " " + help.parameter().replace("\r\n", " ").replace("\n", " "));

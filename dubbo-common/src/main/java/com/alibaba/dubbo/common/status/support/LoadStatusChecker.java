@@ -33,7 +33,7 @@ public class LoadStatusChecker implements StatusChecker {
 
     public Status check() {
     	OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
-    	double load;
+    	double load;//最后一分钟内系统加载平均值
     	try {
     	    Method method = OperatingSystemMXBean.class.getMethod("getSystemLoadAverage", new Class<?>[0]);
     	    load = (Double)method.invoke(operatingSystemMXBean, new Object[0]);
@@ -43,5 +43,4 @@ public class LoadStatusChecker implements StatusChecker {
     	int cpu = operatingSystemMXBean.getAvailableProcessors();//返回 Java 虚拟机可以使用的处理器数目
         return new Status(load < 0 ? Status.Level.UNKNOWN : (load < cpu ? Status.Level.OK : Status.Level.WARN), (load < 0 ? "" : "load:" + load + ",") + "cpu:" + cpu);
     }
-
 }

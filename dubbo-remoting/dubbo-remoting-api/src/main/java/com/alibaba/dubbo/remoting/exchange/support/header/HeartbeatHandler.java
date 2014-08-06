@@ -28,6 +28,8 @@ import com.alibaba.dubbo.remoting.transport.AbstractChannelHandlerDelegate;
 
 /**
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
+ * 心跳的channelhandler 记录各种心跳时间 
+ * 在received的时候判断是否是心跳操作
  */
 public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 

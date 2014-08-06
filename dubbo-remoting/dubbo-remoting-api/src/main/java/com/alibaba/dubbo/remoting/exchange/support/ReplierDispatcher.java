@@ -23,12 +23,12 @@ import com.alibaba.dubbo.remoting.exchange.ExchangeChannel;
 
 /**
  * ReplierDispatcher
- * 
+ * 答复者调度器
  * @author william.liangf
  */
 public class ReplierDispatcher implements Replier<Object> {
 
-    private final Replier<?> defaultReplier;
+    private final Replier<?> defaultReplier;//默认答复者
     
     private final Map<Class<?>, Replier<?>> repliers = new ConcurrentHashMap<Class<?>, Replier<?>>();
 
@@ -46,17 +46,31 @@ public class ReplierDispatcher implements Replier<Object> {
             this.repliers.putAll(repliers);
         }
     }
-
+    /**
+     * 加入一个答复者
+     * @param type
+     * @param replier
+     * @return
+     */
     public <T> ReplierDispatcher addReplier(Class<T> type, Replier<T> replier) {
         repliers.put(type, replier);
         return this;
     }
-
+    /**
+     * 删除一个答复者
+     * @param type
+     * @return
+     */
     public <T> ReplierDispatcher removeReplier(Class<T> type) {
         repliers.remove(type);
         return this;
     }
-
+    /**
+     * 获取一个答复者
+     * 只要是子类就可以 如果没有返回默认答复者
+     * @param type
+     * @return
+     */
     private Replier<?> getReplier(Class<?> type) {
         for(Map.Entry<Class<?>, Replier<?>> entry : repliers.entrySet()) {
             if(entry.getKey().isAssignableFrom(type)) {
@@ -68,7 +82,9 @@ public class ReplierDispatcher implements Replier<Object> {
         }
         throw new IllegalStateException("Replier not found, Unsupported message object: " + type);
     }
-
+    /**
+     * 选择合适的答复者去答复
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Object reply(ExchangeChannel channel, Object request) throws RemotingException {
         return ((Replier)getReplier(request.getClass())).reply(channel, request);

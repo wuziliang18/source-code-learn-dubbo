@@ -27,7 +27,7 @@ import com.alibaba.dubbo.remoting.exchange.ExchangeServer;
 
 /**
  * ExchangeServerDelegate
- * 
+ * ExchangeServer委托
  * @author william.liangf
  */
 public class ExchangeServerDelegate implements ExchangeServer {

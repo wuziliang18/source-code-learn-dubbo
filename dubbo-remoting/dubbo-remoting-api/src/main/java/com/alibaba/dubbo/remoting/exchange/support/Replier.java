@@ -20,7 +20,7 @@ import com.alibaba.dubbo.remoting.exchange.ExchangeChannel;
 
 /**
  * Replier. (API, Prototype, ThreadSafe)
- * 
+ * 答复者
  * @author william.liangf
  */
 public interface Replier<T> {

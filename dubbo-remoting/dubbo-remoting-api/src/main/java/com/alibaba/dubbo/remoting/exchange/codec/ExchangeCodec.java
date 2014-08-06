@@ -58,11 +58,11 @@ public class ExchangeCodec extends TelnetCodec {
     protected static final byte     MAGIC_LOW          = Bytes.short2bytes(MAGIC)[1];
 
     // message flag.
-    protected static final byte     FLAG_REQUEST       = (byte) 0x80;
+    protected static final byte     FLAG_REQUEST       = (byte) 0x80;//占高8位
 
-    protected static final byte     FLAG_TWOWAY        = (byte) 0x40;
+    protected static final byte     FLAG_TWOWAY        = (byte) 0x40;//占高8位
 
-    protected static final byte     FLAG_EVENT     = (byte) 0x20;
+    protected static final byte     FLAG_EVENT     = (byte) 0x20;//占高8位
 
     protected static final int      SERIALIZATION_MASK = 0x1f;
 
@@ -214,7 +214,7 @@ public class ExchangeCodec extends TelnetCodec {
         // header.
         byte[] header = new byte[HEADER_LENGTH];
         // set magic number.
-        Bytes.short2bytes(MAGIC, header);
+        Bytes.short2bytes(MAGIC, header);//MAGIC占了两位
 
         // set request and serialization flag.
         header[2] = (byte) (FLAG_REQUEST | serialization.getContentTypeId());
@@ -223,7 +223,7 @@ public class ExchangeCodec extends TelnetCodec {
         if (req.isEvent()) header[2] |= FLAG_EVENT;
 
         // set request id.
-        Bytes.long2bytes(req.getId(), header, 4);
+        Bytes.long2bytes(req.getId(), header, 4);//占5-12位
 
         // encode request data.
         int savedWriteIndex = buffer.writerIndex();

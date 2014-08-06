@@ -44,7 +44,7 @@ public class StatusTelnetHandler implements TelnetHandler {
 
     public String telnet(Channel channel, String message) {
         if (message.equals("-l")) {
-            List<StatusChecker> checkers = extensionLoader.getActivateExtension(channel.getUrl(), "status");
+            List<StatusChecker> checkers = extensionLoader.getActivateExtension(channel.getUrl(), "status");//获取所有自动激活的检查
             String[] header = new String[] {"resource", "status", "message"};
             List<List<String>> table = new ArrayList<List<String>>();
             Map<String, Status> statuses = new HashMap<String, Status>();
@@ -55,7 +55,7 @@ public class StatusTelnetHandler implements TelnetHandler {
                     try {
                         stat = checker.check();
                     } catch (Throwable t) {
-                        stat = new Status(Status.Level.ERROR, t.getMessage());
+                        stat = new Status(Status.Level.ERROR, t.getMessage());//容错
                     }
                     statuses.put(name, stat);
                     if (stat.getLevel() != null && stat.getLevel() != Status.Level.UNKNOWN) {

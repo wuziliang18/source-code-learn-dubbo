@@ -70,7 +70,7 @@ final class HeartBeatTask implements Runnable {
                     if ( lastRead != null && now - lastRead > heartbeatTimeout ) {
                         logger.warn( "Close channel " + channel
                                              + ", because heartbeat read idle time out: " + heartbeatTimeout + "ms" );
-                        if (channel instanceof Client) {
+                        if (channel instanceof Client) {//如果是客户端重连
                         	try {
                         		((Client)channel).reconnect();
                         	}catch (Exception e) {
@@ -88,7 +88,11 @@ final class HeartBeatTask implements Runnable {
             logger.warn( "Unhandled exception when heartbeat, cause: " + t.getMessage(), t );
         }
     }
-
+    /**
+     * 提供给对外实现的接口
+     * @author wuzl
+     *
+     */
     interface ChannelProvider {
         Collection<Channel> getChannels();
     }

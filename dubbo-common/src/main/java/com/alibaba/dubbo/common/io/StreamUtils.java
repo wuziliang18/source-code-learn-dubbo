@@ -212,7 +212,11 @@ public class StreamUtils
 	public static InputStream markSupportedInputStream(final InputStream is) {
 	    return markSupportedInputStream(is, 1024);
 	}
-
+	/**
+	 * 跳过所有可以读的数据
+	 * @param is
+	 * @throws IOException
+	 */
     public static void skipUnusedStream(InputStream is) throws IOException {
         if (is.available() > 0) {
             is.skip(is.available());
