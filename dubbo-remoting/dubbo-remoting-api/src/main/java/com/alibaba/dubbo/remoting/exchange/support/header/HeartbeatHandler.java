@@ -107,11 +107,19 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
     private void clearWriteTimestamp(Channel channel) {
         channel.removeAttribute(KEY_WRITE_TIMESTAMP);
     }
-
+    /**
+     * 判断是否是心跳请求
+     * @param message
+     * @return
+     */
     private boolean isHeartbeatRequest(Object message) {
         return message instanceof Request && ((Request) message).isHeartbeat();
     }
-
+    /**
+     * 判断是否是心跳回复
+     * @param message
+     * @return
+     */
     private boolean isHeartbeatResponse(Object message) {
         return message instanceof Response && ((Response)message).isHeartbeat();
     }

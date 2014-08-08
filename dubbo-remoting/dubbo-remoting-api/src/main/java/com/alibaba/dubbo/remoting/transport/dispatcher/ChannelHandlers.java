@@ -34,7 +34,15 @@ public class ChannelHandlers {
     }
 
     protected ChannelHandlers() {}
-
+    /**
+     * 对handler进行包装 
+     * 1根据url中选择的调度器第一层包装
+     * 2包装心跳
+     * 3包装支持多消息处理
+     * @param handler
+     * @param url
+     * @return
+     */
     protected ChannelHandler wrapInternal(ChannelHandler handler, URL url) {
         return new MultiMessageHandler(new HeartbeatHandler(ExtensionLoader.getExtensionLoader(Dispatcher.class)
                                         .getAdaptiveExtension().dispatch(handler, url)));

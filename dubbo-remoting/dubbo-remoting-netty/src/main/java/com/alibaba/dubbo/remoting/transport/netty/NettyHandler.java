@@ -36,9 +36,9 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
  * 
  * @author william.liangf
  */
-@Sharable
+@Sharable//注解@Sharable可以让它在多个ChannelHandler间共享
 public class NettyHandler extends SimpleChannelHandler {
-
+	//key是客户端的ip+端口
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>(); // <ip:port, channel>
     
     private final URL url;
@@ -67,7 +67,7 @@ public class NettyHandler extends SimpleChannelHandler {
             if (channel != null) {
                 channels.put(NetUtils.toAddressString((InetSocketAddress) ctx.getChannel().getRemoteAddress()), channel);
             }
-            handler.connected(channel);
+            handler.connected(channel);//调用具体的连接操作
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.getChannel());
         }

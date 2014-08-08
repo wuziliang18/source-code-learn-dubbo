@@ -30,7 +30,11 @@ import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.ChannelHandler;
 import com.alibaba.dubbo.remoting.RemotingException;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
-
+/**
+ * 包装的一个chanelhandler 提供线程池给子类调度用 具体操作可以看子类的覆盖
+ * @author wuzl
+ *
+ */
 public class WrappedChannelHandler implements ChannelHandlerDelegate {
     
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);

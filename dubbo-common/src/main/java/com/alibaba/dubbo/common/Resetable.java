@@ -19,7 +19,7 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * Resetable.
- * 
+ * 重置接口
  * @author william.liangf
  */
 public interface Resetable {

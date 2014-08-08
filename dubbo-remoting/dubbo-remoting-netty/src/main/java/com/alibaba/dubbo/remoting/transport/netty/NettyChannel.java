@@ -32,7 +32,7 @@ import com.alibaba.dubbo.remoting.transport.AbstractChannel;
 
 /**
  * NettyChannel.
- * 
+ * netty chanel的具体实现和操作
  * @author qian.lei
  * @author william.liangf
  */
@@ -42,7 +42,7 @@ final class NettyChannel extends AbstractChannel {
 
     private static final ConcurrentMap<org.jboss.netty.channel.Channel, NettyChannel> channelMap = new ConcurrentHashMap<org.jboss.netty.channel.Channel, NettyChannel>();
 
-    private final org.jboss.netty.channel.Channel channel;
+    private final org.jboss.netty.channel.Channel channel;//当前保存的nettychannel
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
@@ -96,9 +96,9 @@ final class NettyChannel extends AbstractChannel {
         int timeout = 0;
         try {
             ChannelFuture future = channel.write(message);
-            if (sent) {
+            if (sent) {//如果要返回结果 看超时
                 timeout = getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
-                success = future.await(timeout);
+                success = future.await(timeout);//阻塞等待
             }
             Throwable cause = future.getCause();
             if (cause != null) {

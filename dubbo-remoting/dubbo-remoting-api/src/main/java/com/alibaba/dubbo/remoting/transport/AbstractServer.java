@@ -42,17 +42,17 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
     
     private static final Logger logger = LoggerFactory.getLogger(AbstractServer.class);
 
-    private InetSocketAddress              localAddress;
+    private InetSocketAddress              localAddress;//服务端的地址
 
-    private InetSocketAddress              bindAddress;
+    private InetSocketAddress              bindAddress;//可能是localAddress 也可能ip是0.0.0.0
 
-    private int                            accepts;
+    private int                            accepts;//服务器端接受的连接
 
-    private int                            idleTimeout = 600; //600 seconds
+    private int                            idleTimeout = 600; //600 seconds 空闲的超时时间
     
     protected static final String SERVER_THREAD_POOL_NAME  ="DubboServerHandler";
     
-    ExecutorService executor;
+    ExecutorService executor;//对象独自的线程池
 
     public AbstractServer(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
@@ -64,7 +64,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
         this.accepts = url.getParameter(Constants.ACCEPTS_KEY, Constants.DEFAULT_ACCEPTS);
         this.idleTimeout = url.getParameter(Constants.IDLE_TIMEOUT_KEY, Constants.DEFAULT_IDLE_TIMEOUT);
         try {
-            doOpen();
+            doOpen();//调用模板方法 完成具体的open操作
             if (logger.isInfoEnabled()) {
                 logger.info("Start " + getClass().getSimpleName() + " bind " + getBindAddress() + ", export " + getLocalAddress());
             }
@@ -129,7 +129,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
         } catch (Throwable t) {
             logger.error(t.getMessage(), t);
         }
-        super.setUrl(getUrl().addParameters(url.getParameters()));
+        super.setUrl(getUrl().addParameters(url.getParameters()));//告诉u父类 url已经是最新的了
     }
 
     public void send(Object message, boolean sent) throws RemotingException {

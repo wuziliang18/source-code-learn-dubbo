@@ -24,9 +24,12 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 
 /**
  * @author <a href="mailto:gang.lvg@taobao.com">kimi</a>
+ * 整个类就做了一件事 设置netty的日志工厂
  */
 final class NettyHelper {
-
+	/**
+	 * 设置全局的netty日志工厂
+	 */
     public static void setNettyLoggerFactory() {
         InternalLoggerFactory factory = InternalLoggerFactory.getDefaultFactory();
         if (factory == null || !(factory instanceof DubboLoggerFactory)) {
@@ -41,7 +44,11 @@ final class NettyHelper {
             return new DubboLogger(LoggerFactory.getLogger(name));
         }
     }
-
+    /**
+     * 重写netty的日志系统
+     * @author wuzl
+     *
+     */
     static class DubboLogger extends AbstractInternalLogger {
 
         private Logger logger;

@@ -36,7 +36,7 @@ import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
 
 /**
  * NettyCodecAdapter.
- * 
+ * netty codec 的适配
  * @author qian.lei
  */
 final class NettyCodecAdapter {

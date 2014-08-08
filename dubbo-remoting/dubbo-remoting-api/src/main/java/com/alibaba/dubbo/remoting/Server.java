@@ -46,7 +46,7 @@ public interface Server extends Endpoint, Resetable {
 
     /**
      * get channel.
-     * 
+     * 获取与一个客户端的连接通道
      * @param remoteAddress
      * @return channel
      */

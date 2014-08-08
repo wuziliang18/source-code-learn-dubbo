@@ -53,21 +53,25 @@ public class NettyServer extends AbstractServer implements Server {
     
     private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
 
-    private Map<String, Channel>  channels; // <ip:port, channel>
+    private Map<String, Channel>  channels; // <ip:port, channel>//NettyHandler的channels共用不安全的
 
-    private ServerBootstrap                 bootstrap;
+    private ServerBootstrap                 bootstrap;//负责初始话netty服务器，并且开始监听端口的socket请求
 
     private org.jboss.netty.channel.Channel channel;
 
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException{
+    	//对handler进行包装后调用父类构造函数
         super(url, ChannelHandlers.wrap(handler, ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME)));
     }
 
     @Override
     protected void doOpen() throws Throwable {
-        NettyHelper.setNettyLoggerFactory();
+        NettyHelper.setNettyLoggerFactory();//设置日志工厂
+        //boss线程池每个线程对应一个socket
         ExecutorService boss = Executors.newCachedThreadPool(new NamedThreadFactory("NettyServerBoss", true));
+        //处理boss线程接收后生成的channel
         ExecutorService worker = Executors.newCachedThreadPool(new NamedThreadFactory("NettyServerWorker", true));
+        //主要负责生产网络通信相关的Channel和ChannelSink实例 异步的
         ChannelFactory channelFactory = new NioServerSocketChannelFactory(boss, worker, getUrl().getPositiveParameter(Constants.IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS));
         bootstrap = new ServerBootstrap(channelFactory);
         
@@ -152,7 +156,7 @@ public class NettyServer extends AbstractServer implements Server {
     }
 
     public boolean isBound() {
-        return channel.isBound();
+        return channel.isBound();//返回套接字的绑定状态
     }
 
 }
