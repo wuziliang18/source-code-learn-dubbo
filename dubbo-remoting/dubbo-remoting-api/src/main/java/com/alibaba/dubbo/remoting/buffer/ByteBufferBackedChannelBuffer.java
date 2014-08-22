@@ -27,9 +27,9 @@ import java.nio.ByteOrder;
  */
 public class ByteBufferBackedChannelBuffer extends AbstractChannelBuffer {
 
-    private final ByteBuffer buffer;
+    private final ByteBuffer buffer;//与传入参数的position和limit之间数据共享
 
-    private final int capacity;
+    private final int capacity;//容量
 
     public ByteBufferBackedChannelBuffer(ByteBuffer buffer) {
         if (buffer == null) {
@@ -46,7 +46,9 @@ public class ByteBufferBackedChannelBuffer extends AbstractChannelBuffer {
         capacity = buffer.capacity;
         setIndex(buffer.readerIndex(), buffer.writerIndex());
     }
-
+    /**
+     * 根绝缓冲区是否是直接缓冲区 选择ChannelBufferFactory
+     */
     public ChannelBufferFactory factory() {
         if (buffer.isDirect()) {
             return DirectChannelBufferFactory.getInstance();

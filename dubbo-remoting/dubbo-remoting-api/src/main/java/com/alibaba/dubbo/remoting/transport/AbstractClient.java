@@ -57,7 +57,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     private static final AtomicInteger CLIENT_THREAD_POOL_ID = new AtomicInteger();
 
     private final Lock            connectLock = new ReentrantLock();
-    //可以定时执行任务的线程池 两个线程
+    //可以定时执行任务的线程池 两个线程容量
     private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("DubboClientReconnectTimer", true));
     //ScheduledExecutorService中提交了任务的返回结果
     private volatile  ScheduledFuture<?> reconnectExecutorFuture = null;
@@ -139,6 +139,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         //reconnect=false to close reconnect 
         int reconnect = getReconnectParam(getUrl());
         //如果有重连时间 也就是url中reconnect!=false 并且没有运行重连进程运行
+        //reconnectExecutorFuture的判断保证只执行一次（正常情况下）
         if(reconnect > 0 && (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled())){
             Runnable connectStatusCheckCommand =  new Runnable() {//这个线程监听连接 如果断了调用方法去重连 否则只是记录最后连接时间
                 public void run() {
