@@ -57,7 +57,7 @@ public class TelnetCodec extends TransportCodec {
 
     public void encode(Channel channel, ChannelBuffer buffer, Object message) throws IOException {
         if (message instanceof String) {
-            if (isClientSide(channel)) {
+            if (isClientSide(channel)) {//命令行输入的都是client 调用的都是服务端的
                 message = message + "\r\n";
             }
             byte[] msgData = ((String) message).getBytes(getCharset(channel).name());
