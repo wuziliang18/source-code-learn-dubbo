@@ -78,5 +78,4 @@ public class Status {
     public String getDescription() {
         return description;
     }
-
 }

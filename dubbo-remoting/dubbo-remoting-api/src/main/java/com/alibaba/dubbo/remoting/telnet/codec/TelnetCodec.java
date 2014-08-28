@@ -70,7 +70,7 @@ public class TelnetCodec extends TransportCodec {
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
         int readable = buffer.readableBytes();
         byte[] message = new byte[readable];
-        buffer.readBytes(message);
+        buffer.readBytes(message);//没有读的信息 保存到message数组中
         return decode(channel, buffer, readable, message);
     }
 
@@ -190,6 +190,7 @@ public class TelnetCodec extends TransportCodec {
             }
         }
         String result = toString(message, getCharset(channel));
+        //保存命令到列表中
         if (result != null && result.trim().length() > 0) {
             if (history == null) {
                 history = new LinkedList<String>();

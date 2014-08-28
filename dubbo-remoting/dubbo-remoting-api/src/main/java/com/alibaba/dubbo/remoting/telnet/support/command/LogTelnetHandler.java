@@ -51,7 +51,7 @@ public class LogTelnetHandler implements TelnetHandler {
         }else {
             String str[] = message.split(" ");
             if (! StringUtils.isInteger(str[0])){
-                LoggerFactory.setLevel(Level.valueOf(message.toUpperCase()));//没有容错？
+                LoggerFactory.setLevel(Level.valueOf(message.toUpperCase()));//没有容错？直接打印异常信息
             } else {
                 int SHOW_LOG_LENGTH = Integer.parseInt(str[0]);
                 
