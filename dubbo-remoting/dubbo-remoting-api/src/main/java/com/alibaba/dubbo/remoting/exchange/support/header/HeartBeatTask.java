@@ -25,6 +25,7 @@ import com.alibaba.dubbo.remoting.Client;
 import com.alibaba.dubbo.remoting.exchange.Request;
 
 /**
+ * 心跳的线程任务 防止长时间没有通讯
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
  */
 final class HeartBeatTask implements Runnable {
@@ -33,7 +34,7 @@ final class HeartBeatTask implements Runnable {
 
     private ChannelProvider channelProvider;
 
-    private int             heartbeat;
+    private int             heartbeat;//心跳间隔
 
     private int             heartbeatTimeout;
 
@@ -56,7 +57,7 @@ final class HeartBeatTask implements Runnable {
                     Long lastWrite = ( Long ) channel.getAttribute(
                             HeaderExchangeHandler.KEY_WRITE_TIMESTAMP );
                     if ( ( lastRead != null && now - lastRead > heartbeat )
-                            || ( lastWrite != null && now - lastWrite > heartbeat ) ) {
+                            || ( lastWrite != null && now - lastWrite > heartbeat ) ) {//发送心跳请求
                         Request req = new Request();
                         req.setVersion( "2.0.0" );
                         req.setTwoWay( true );
@@ -67,7 +68,8 @@ final class HeartBeatTask implements Runnable {
                                                   + ", cause: The channel has no data-transmission exceeds a heartbeat period: " + heartbeat + "ms" );
                         }
                     }
-                    if ( lastRead != null && now - lastRead > heartbeatTimeout ) {
+                    //长时间没有被读 客户端会去重连 服务端会断开连接
+                    if ( lastRead != null && now - lastRead > heartbeatTimeout ) {//心跳超时
                         logger.warn( "Close channel " + channel
                                              + ", because heartbeat read idle time out: " + heartbeatTimeout + "ms" );
                         if (channel instanceof Client) {//如果是客户端重连

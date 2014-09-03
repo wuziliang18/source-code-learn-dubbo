@@ -83,12 +83,14 @@ public class DefaultFuture implements ResponseFuture {
     public Object get() throws RemotingException {
         return get(timeout);
     }
-
+    /**
+     * 在超时内获取信息  与回调互斥 等待received方法唤起
+     */
     public Object get(int timeout) throws RemotingException {
         if (timeout <= 0) {
             timeout = Constants.DEFAULT_TIMEOUT;
         }
-        if (! isDone()) {
+        if (! isDone()) {//没有完成操作
             long start = System.currentTimeMillis();
             lock.lock();
             try {
@@ -117,11 +119,15 @@ public class DefaultFuture implements ResponseFuture {
         FUTURES.remove(id);
         CHANNELS.remove(id);
     }
-
+    /**
+     * 有response的时候表明已经完成了
+     */
     public boolean isDone() {
         return response != null;
     }
-
+    /**
+     * 利用回调类操作 与get互斥
+     */
     public void setCallback(ResponseCallback callback) {
         if (isDone()) {
             invokeCallback(callback);
@@ -241,7 +247,11 @@ public class DefaultFuture implements ResponseFuture {
     private void doSent() {
         sent = System.currentTimeMillis();
     }
-
+    /**
+     * 似乎是等待触发后去给response赋值 然后唤起可能存在的get等待
+     * @param channel
+     * @param response
+     */
     public static void received(Channel channel, Response response) {
         try {
             DefaultFuture future = FUTURES.remove(response.getId());
@@ -264,7 +274,7 @@ public class DefaultFuture implements ResponseFuture {
         try {
             response = res;
             if (done != null) {
-                done.signal();
+                done.signal();//唤醒
             }
         } finally {
             lock.unlock();

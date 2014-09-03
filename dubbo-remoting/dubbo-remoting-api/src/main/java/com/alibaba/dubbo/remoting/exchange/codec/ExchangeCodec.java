@@ -90,7 +90,7 @@ public class ExchangeCodec extends TelnetCodec {
     protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] header) throws IOException {
         // check magic number.
         if (readable > 0 && header[0] != MAGIC_HIGH 
-                || readable > 1 && header[1] != MAGIC_LOW) {
+                || readable > 1 && header[1] != MAGIC_LOW) {//检查是否是dubbo的header
             int length = header.length;
             if (header.length < readable) {
                 header = Bytes.copyOf(header, readable);
@@ -111,7 +111,7 @@ public class ExchangeCodec extends TelnetCodec {
         }
 
         // get data length.
-        int len = Bytes.bytes2int(header, 12);
+        int len = Bytes.bytes2int(header, 12);//数据长度
         checkPayload(channel, len);
 
         int tt = len + HEADER_LENGTH;
@@ -130,17 +130,24 @@ public class ExchangeCodec extends TelnetCodec {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Skip input stream " + is.available());
                     }
-                    StreamUtils.skipUnusedStream(is);
+                    StreamUtils.skipUnusedStream(is);//跳过数据
                 } catch (IOException e) {
                     logger.warn(e.getMessage(), e);
                 }
             }
         }
     }
-
+    /**
+     * 似乎没有呗调用被子类覆盖了
+     * @param channel
+     * @param is
+     * @param header
+     * @return
+     * @throws IOException
+     */
     protected Object decodeBody(Channel channel, InputStream is, byte[] header) throws IOException {
         byte flag = header[2], proto = (byte) (flag & SERIALIZATION_MASK);
-        Serialization s = CodecSupport.getSerialization(channel.getUrl(), proto);
+        Serialization s = CodecSupport.getSerialization(channel.getUrl(), proto);//获取数据格式化的方式
         ObjectInput in = s.deserialize(channel.getUrl(), is);
         // get request id.
         long id = Bytes.bytes2long(header, 4);
@@ -208,7 +215,13 @@ public class ExchangeCodec extends TelnetCodec {
             return null;
         return req.getData();
     }
-
+    /**
+     * 写入数据到buffer中 写入的数据包括header和实际请求数据
+     * @param channel
+     * @param buffer
+     * @param req
+     * @throws IOException
+     */
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
         Serialization serialization = getSerialization(channel);
         // header.
@@ -228,7 +241,7 @@ public class ExchangeCodec extends TelnetCodec {
         // encode request data.
         int savedWriteIndex = buffer.writerIndex();
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
-        ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);
+        ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);//写入数据会从buffer后边开始写入 留16位给header
         ObjectOutput out = serialization.serialize(channel.getUrl(), bos);
         if (req.isEvent()) {
             encodeEventData(channel, out, req.getData());
@@ -240,11 +253,11 @@ public class ExchangeCodec extends TelnetCodec {
         bos.close();
         int len = bos.writtenBytes();
         checkPayload(channel, len);
-        Bytes.int2bytes(len, header, 12);
+        Bytes.int2bytes(len, header, 12);//写入数据长度
 
         // write
         buffer.writerIndex(savedWriteIndex);
-        buffer.writeBytes(header); // write header.
+        buffer.writeBytes(header); // write header.此处似乎有问题 从0位置开始写入之前的会被覆盖只能有一个消息头
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
     }
 

@@ -75,7 +75,7 @@ public class HeaderExchangeServer implements ExchangeServer {
         if (heartbeatTimeout < heartbeat * 2) {
             throw new IllegalStateException("heartbeatTimeout < heartbeatInterval * 2");
         }
-        startHeatbeatTimer();
+        startHeatbeatTimer();//启动心跳任务
     }
     
     public Server getServer() {
@@ -100,7 +100,9 @@ public class HeaderExchangeServer implements ExchangeServer {
         doClose();
         server.close();
     }
-
+    /**
+     * 加个超时判断(是否还有在运行中)
+     */
     public void close(final int timeout) {
         if (timeout > 0) {
             final long max = (long) timeout;
@@ -120,7 +122,9 @@ public class HeaderExchangeServer implements ExchangeServer {
         doClose();
         server.close(timeout);
     }
-    
+    /**
+     * 似乎是告诉对方不要发送信息了 
+     */
     private void sendChannelReadOnlyEvent(){
         Request request = new Request();
         request.setEvent(Request.READONLY_EVENT);
@@ -149,7 +153,9 @@ public class HeaderExchangeServer implements ExchangeServer {
             logger.warn(t.getMessage(), t);
         }
     }
-
+    /**
+     * 获取所有的通道并且包装成HeaderExchangeChannel
+     */
     public Collection<ExchangeChannel> getExchangeChannels() {
         Collection<ExchangeChannel> exchangeChannels  = new ArrayList<ExchangeChannel>();
         Collection<Channel> channels = server.getChannels();
@@ -194,6 +200,7 @@ public class HeaderExchangeServer implements ExchangeServer {
     public void reset(URL url) {
         server.reset(url);
         try {
+        	//如果发现超时啥的有变化了 要重启心跳任务
             if (url.hasParameter(Constants.HEARTBEAT_KEY)
                     || url.hasParameter(Constants.HEARTBEAT_TIMEOUT_KEY)) {
                 int h = url.getParameter(Constants.HEARTBEAT_KEY, heartbeat);

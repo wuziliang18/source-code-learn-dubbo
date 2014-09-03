@@ -98,7 +98,9 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
         return res;
     }
-
+    /*
+     * 把response交给返回结果(是客户端在得到结果后自己完成的)
+     */
     static void handleResponse(Channel channel, Response response) throws RemotingException {
         if (response != null && !response.isHeartbeat()) {
             DefaultFuture.received(channel, response);
@@ -165,7 +167,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
     }
 
     public void received(Channel channel, Object message) throws RemotingException {
-        channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());
+        channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());//刷新最后读取时间
         ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
         try {
             if (message instanceof Request) {//如果是request 有不同的操作 
@@ -174,21 +176,21 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                 if (request.isEvent()) {
                     handlerEvent(channel, request);
                 } else {
-                    if (request.isTwoWay()) {
-                        Response response = handleRequest(exchangeChannel, request);
+                    if (request.isTwoWay()) {//要求有返回值
+                        Response response = handleRequest(exchangeChannel, request);//返回处理后的结果
                         channel.send(response);
                     } else {
-                        handler.received(exchangeChannel, request.getData());
+                        handler.received(exchangeChannel, request.getData());//只处理不用返回值
                     }
                 }
             } else if (message instanceof Response) {//如果是response 接收数据
-                handleResponse(channel, (Response) message);
+                handleResponse(channel, (Response) message);//把结果数据交给DefaultFuture
             } else if (message instanceof String) {
                 if (isClientSide(channel)) {
                     Exception e = new Exception("Dubbo client can not supported string message: " + message + " in channel: " + channel + ", url: " + channel.getUrl());
                     logger.error(e.getMessage(), e);
                 } else {
-                    String echo = handler.telnet(channel, (String) message);
+                    String echo = handler.telnet(channel, (String) message);//认为是telnet操作
                     if (echo != null && echo.length() > 0) {
                         channel.send(echo);
                     }
