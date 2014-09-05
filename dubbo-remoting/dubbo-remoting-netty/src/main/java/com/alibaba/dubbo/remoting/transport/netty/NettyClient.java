@@ -40,7 +40,7 @@ import com.alibaba.dubbo.remoting.transport.AbstractClient;
 
 /**
  * NettyClient.
- * 
+ * 每连接一个服务端会重新初始化一个
  * @author qian.lei
  * @author william.liangf
  */
@@ -67,9 +67,9 @@ public class NettyClient extends AbstractClient {
         bootstrap = new ClientBootstrap(channelFactory);
         // config
         // @see org.jboss.netty.channel.socket.SocketChannelConfig
-        bootstrap.setOption("keepAlive", true);
-        bootstrap.setOption("tcpNoDelay", true);
-        bootstrap.setOption("connectTimeoutMillis", getTimeout());
+        bootstrap.setOption("keepAlive", true);//
+        bootstrap.setOption("tcpNoDelay", true);// 禁用nagle算法
+        bootstrap.setOption("connectTimeoutMillis", getTimeout());//连接超时时间（毫秒）
         final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
         bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
             public ChannelPipeline getPipeline() {
@@ -92,6 +92,7 @@ public class NettyClient extends AbstractClient {
             if (ret && future.isSuccess()) {
                 Channel newChannel = future.getChannel();
                 newChannel.setInterestOps(Channel.OP_READ_WRITE);
+                //下边的代码是防止重连channel的时候老的没有关闭
                 try {
                     // 关闭旧的连接
                     Channel oldChannel = NettyClient.this.channel; // copy reference
@@ -144,7 +145,9 @@ public class NettyClient extends AbstractClient {
             logger.warn(t.getMessage());
         }
     }
-    
+    /**
+     * 没有关闭bootstrap 个人以为可能是像开头说的怕内存泄露
+     */
     @Override
     protected void doClose() throws Throwable {
         /*try {

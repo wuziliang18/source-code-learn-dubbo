@@ -85,16 +85,18 @@ final class NettyCodecAdapter {
             return ChannelBuffers.wrappedBuffer(buffer.toByteBuffer());
         }
     }
-
+    
     private class InternalDecoder extends SimpleChannelUpstreamHandler {
 
         private com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =
             com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
-
+        /**
+         * 此处代码跟netty源码有类似
+         */
         @Override
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) throws Exception {
             Object o = event.getMessage();
-            if (! (o instanceof ChannelBuffer)) {
+            if (! (o instanceof ChannelBuffer)) {//不是自己处理的就要继续走
                 ctx.sendUpstream(event);
                 return;
             }
@@ -106,7 +108,7 @@ final class NettyCodecAdapter {
             }
 
             com.alibaba.dubbo.remoting.buffer.ChannelBuffer message;
-            if (buffer.readable()) {
+            if (buffer.readable()) {//这逼地方永远进不来呀不明白
                 if (buffer instanceof DynamicChannelBuffer) {
                     buffer.writeBytes(input.toByteBuffer());
                     message = buffer;
@@ -145,7 +147,7 @@ final class NettyCodecAdapter {
                             throw new IOException("Decode without read data.");
                         }
                         if (msg != null) {
-                            Channels.fireMessageReceived(ctx, msg, event.getRemoteAddress());
+                            Channels.fireMessageReceived(ctx, msg, event.getRemoteAddress());//继续向下走 把解码对象传下去
                         }
                     }
                 } while (message.readable());
@@ -159,10 +161,12 @@ final class NettyCodecAdapter {
                 NettyChannel.removeChannelIfDisconnected(ctx.getChannel());
             }
         }
-
+        /**
+         *整个类出现错误的时候会走这个方法 用来把错误处理或继续向下抛 
+         */
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-            ctx.sendUpstream(e);
+            ctx.sendUpstream(e); //将这个命令传递给下一个handler来处理.  
         }
     }
 }

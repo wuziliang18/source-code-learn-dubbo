@@ -39,10 +39,10 @@ import com.alibaba.dubbo.remoting.transport.AbstractChannel;
 final class NettyChannel extends AbstractChannel {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyChannel.class);
-
+    //nettychanel与当前类的键值对集合
     private static final ConcurrentMap<org.jboss.netty.channel.Channel, NettyChannel> channelMap = new ConcurrentHashMap<org.jboss.netty.channel.Channel, NettyChannel>();
 
-    private final org.jboss.netty.channel.Channel channel;//当前保存的nettychannel
+    private final org.jboss.netty.channel.Channel channel;//当前保存的nettychannel 与nettyserver里的不是一个每连接一个客户端产生一个
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 

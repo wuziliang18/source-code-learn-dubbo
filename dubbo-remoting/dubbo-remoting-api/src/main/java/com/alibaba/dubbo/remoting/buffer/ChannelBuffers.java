@@ -74,7 +74,7 @@ public final class ChannelBuffers {
             return EMPTY_BUFFER;
         }
         if (buffer.hasArray()) {
-            return wrappedBuffer(buffer.array(), buffer.arrayOffset() + buffer.position(), buffer.remaining());
+            return wrappedBuffer(buffer.array(), buffer.arrayOffset() + buffer.position(), buffer.remaining());//arrayOffset缓冲区偏移量
         } else {
             return new ByteBufferBackedChannelBuffer(buffer);
         }

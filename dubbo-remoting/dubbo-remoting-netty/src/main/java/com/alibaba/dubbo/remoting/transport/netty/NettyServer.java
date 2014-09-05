@@ -57,7 +57,7 @@ public class NettyServer extends AbstractServer implements Server {
 
     private ServerBootstrap                 bootstrap;//负责初始话netty服务器，并且开始监听端口的socket请求
 
-    private org.jboss.netty.channel.Channel channel;
+    private org.jboss.netty.channel.Channel channel;//服务端的channel与客户端连接过来的无关
 
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException{
     	//对handler进行包装后调用父类构造函数
@@ -113,7 +113,7 @@ public class NettyServer extends AbstractServer implements Server {
             if (channels != null && channels.size() > 0) {
                 for (com.alibaba.dubbo.remoting.Channel channel : channels) {
                     try {
-                        channel.close();
+                        channel.close    ();
                     } catch (Throwable e) {
                         logger.warn(e.getMessage(), e);
                     }
@@ -125,7 +125,7 @@ public class NettyServer extends AbstractServer implements Server {
         try {
             if (bootstrap != null) { 
                 // release external resource.
-                bootstrap.releaseExternalResources();
+                bootstrap.releaseExternalResources();//关闭释放netty所有资源
             }
         } catch (Throwable e) {
             logger.warn(e.getMessage(), e);

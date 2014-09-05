@@ -11,6 +11,7 @@ import com.alibaba.dubbo.remoting.buffer.ChannelBufferFactory;
 import com.alibaba.dubbo.remoting.buffer.ChannelBuffers;
 
 /**
+ * 对netty的buffer的包装类
  * @author <a href="mailto:gang.lvg@taobao.com">kimi</a>
  */
 public class NettyBackedChannelBuffer implements ChannelBuffer {
