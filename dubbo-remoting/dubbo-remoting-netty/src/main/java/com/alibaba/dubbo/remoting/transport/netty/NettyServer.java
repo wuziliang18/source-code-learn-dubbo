@@ -113,7 +113,7 @@ public class NettyServer extends AbstractServer implements Server {
             if (channels != null && channels.size() > 0) {
                 for (com.alibaba.dubbo.remoting.Channel channel : channels) {
                     try {
-                        channel.close    ();
+                        channel.close();
                     } catch (Throwable e) {
                         logger.warn(e.getMessage(), e);
                     }

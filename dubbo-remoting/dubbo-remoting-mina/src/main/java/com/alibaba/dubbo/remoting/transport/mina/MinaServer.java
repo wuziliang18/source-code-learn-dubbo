@@ -41,7 +41,7 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelHandlers;
 
 /**
  * MinaServer
- * 
+ * mina用的是session类似于netty的chanel
  * @author qian.lei
  * @author william.liangf
  * @author ding.lid
