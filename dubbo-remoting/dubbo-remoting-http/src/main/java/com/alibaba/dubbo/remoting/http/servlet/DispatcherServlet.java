@@ -54,7 +54,9 @@ public class DispatcherServlet extends HttpServlet {
     public DispatcherServlet() {
     	DispatcherServlet.INSTANCE = this;
     }
-
+    /**
+     * 交给HttpHandler去处理
+     */
     protected void service(HttpServletRequest request, HttpServletResponse response) 
     		throws ServletException, IOException {
         HttpHandler handler = handlers.get(request.getLocalPort());

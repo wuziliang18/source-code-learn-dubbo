@@ -29,7 +29,11 @@ import com.alibaba.dubbo.common.utils.NetUtils;
 import com.alibaba.dubbo.remoting.http.HttpHandler;
 import com.alibaba.dubbo.remoting.http.servlet.DispatcherServlet;
 import com.alibaba.dubbo.remoting.http.support.AbstractHttpServer;
-
+/**
+ * 启动一个jettyserver
+ * jetty的核心是 Server Server主要又由connector，handler和threadpool组成
+ *
+ */
 public class JettyHttpServer extends AbstractHttpServer {
 
     private static final Logger logger = LoggerFactory.getLogger(JettyHttpServer.class);
@@ -46,7 +50,7 @@ public class JettyHttpServer extends AbstractHttpServer {
         threadPool.setMaxThreads(threads);
         threadPool.setMinThreads(threads);
 
-        SelectChannelConnector connector = new SelectChannelConnector();
+        SelectChannelConnector connector = new SelectChannelConnector();// nio的观察者
         if (! url.isAnyHost() && NetUtils.isValidLocalHost(url.getHost())) {
             connector.setHost(url.getHost());
         }
