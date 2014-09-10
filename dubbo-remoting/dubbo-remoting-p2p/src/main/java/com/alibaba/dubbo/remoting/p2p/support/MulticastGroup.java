@@ -38,9 +38,9 @@ public class MulticastGroup extends AbstractGroup {
     
     private static final String LEAVE = "leave";
 
-    private InetAddress mutilcastAddress;
+    private InetAddress mutilcastAddress;//多播地址
     
-    private MulticastSocket mutilcastSocket;
+    private MulticastSocket mutilcastSocket;//多播socket
 
     public MulticastGroup(URL url) {
         super(url);
@@ -48,6 +48,7 @@ public class MulticastGroup extends AbstractGroup {
             throw new IllegalArgumentException("Invalid multicast address " + url.getHost() + ", scope: 224.0.0.0 - 239.255.255.255");
         }
         try {
+        	//准备一些多播用到的
             mutilcastAddress = InetAddress.getByName(url.getHost());
             mutilcastSocket = new MulticastSocket(url.getPort());
             mutilcastSocket.setLoopbackMode(false);
@@ -56,9 +57,10 @@ public class MulticastGroup extends AbstractGroup {
                 public void run() {
                     byte[] buf = new byte[1024];
                     DatagramPacket recv = new DatagramPacket(buf, buf.length);
-                    while (true) {
+                    while (true) {//起一个线程去接收多播的数据
                         try {
                             mutilcastSocket.receive(recv);
+                            //获取信息和消息来源
                             MulticastGroup.this.receive(new String(recv.getData()).trim(), (InetSocketAddress) recv.getSocketAddress());
                         } catch (Exception e) {
                             logger.error(e.getMessage(), e);
@@ -84,7 +86,11 @@ public class MulticastGroup extends AbstractGroup {
         }
         return false;
     }
-    
+    /**
+     * 发送组播信息
+     * @param msg
+     * @throws RemotingException
+     */
     private void send(String msg) throws RemotingException {
         DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(), mutilcastAddress, mutilcastSocket.getLocalPort());
         try {
