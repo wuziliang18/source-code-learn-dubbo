@@ -19,7 +19,9 @@ import com.netflix.curator.framework.api.CuratorWatcher;
 import com.netflix.curator.framework.state.ConnectionState;
 import com.netflix.curator.framework.state.ConnectionStateListener;
 import com.netflix.curator.retry.RetryNTimes;
-
+/*
+ * 使用curator客户端来操作zk
+ */
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatcher> {
 
 	private final CuratorFramework client;
@@ -29,14 +31,14 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
 		try {
 			Builder builder = CuratorFrameworkFactory.builder()
 					.connectString(url.getBackupAddress())
-			        .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))  
-			        .connectionTimeoutMs(5000);
+			        .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))  //重试策略
+			        .connectionTimeoutMs(5000);//超时时间
 			String authority = url.getAuthority();
 			if (authority != null && authority.length() > 0) {
 				builder = builder.authorization("digest", authority.getBytes());
 			}
 			client = builder.build();
-			client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+			client.getConnectionStateListenable().addListener(new ConnectionStateListener() {//监听连接信息
 				public void stateChanged(CuratorFramework client, ConnectionState state) {
 					if (state == ConnectionState.LOST) {
 						CuratorZookeeperClient.this.stateChanged(StateListener.DISCONNECTED);
@@ -47,7 +49,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
 					}
 				}
 			});
-			client.start();
+			client.start();//必须要start
 		} catch (IOException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}

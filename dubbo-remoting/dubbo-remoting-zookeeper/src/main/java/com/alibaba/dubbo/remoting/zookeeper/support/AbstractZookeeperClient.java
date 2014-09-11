@@ -12,7 +12,11 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.remoting.zookeeper.ChildListener;
 import com.alibaba.dubbo.remoting.zookeeper.StateListener;
 import com.alibaba.dubbo.remoting.zookeeper.ZookeeperClient;
-
+/**
+ * client的抽象
+ *
+ * @param <TargetChildListener>
+ */
 public abstract class AbstractZookeeperClient<TargetChildListener> implements ZookeeperClient {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractZookeeperClient.class);
@@ -32,16 +36,18 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 	public URL getUrl() {
 		return url;
 	}
-
+	/**
+	 * 生成新节点
+	 */
 	public void create(String path, boolean ephemeral) {
 		int i = path.lastIndexOf('/');
-		if (i > 0) {
+		if (i > 0) {//递归建造目录
 			create(path.substring(0, i), false);
 		}
 		if (ephemeral) {
-			createEphemeral(path);
+			createEphemeral(path);//临时的session存在期间有效 不能有子节点所以递归的时候false
 		} else {
-			createPersistent(path);
+			createPersistent(path);//永久的
 		}
 	}
 
@@ -56,7 +62,9 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 	public Set<StateListener> getSessionListeners() {
 		return stateListeners;
 	}
-
+	/**
+	 * 添加一个路径下的监听
+	 */
 	public List<String> addChildListener(String path, final ChildListener listener) {
 		ConcurrentMap<ChildListener, TargetChildListener> listeners = childListeners.get(path);
 		if (listeners == null) {
@@ -80,7 +88,10 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 			}
 		}
 	}
-
+	/**
+	 * 触发所有的状态监听
+	 * @param state
+	 */
 	protected void stateChanged(int state) {
 		for (StateListener sessionListener : getSessionListeners()) {
 			sessionListener.stateChanged(state);
