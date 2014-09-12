@@ -573,9 +573,9 @@ public class RpcContext {
 							return o;
 						}
 					});
-					f.run();
+					f.run();//必须要run下 否则获取不到值 阻塞住 
 					return f;
-				} else {
+				} else {//可能关键是这里 只有没有返回值的时候才会使得getContext()有用
 					
 				}
 			} catch (Exception e) {
