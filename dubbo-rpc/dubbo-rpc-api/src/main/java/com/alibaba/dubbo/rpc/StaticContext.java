@@ -65,6 +65,13 @@ public class StaticContext extends ConcurrentHashMap<Object, Object>{
     public static String getKey(Map<String, String> paras, String methodName, String suffix) {
         return getKey(StringUtils.getServiceKey(paras), methodName, suffix);
     }
+    /**
+     * 拼接key 格式为servicekey(group/interface:version   interface必须).methodname.suffix
+     * @param servicekey
+     * @param methodName
+     * @param suffix
+     * @return
+     */
     private static String getKey(String servicekey, String methodName, String suffix) {
         StringBuffer sb = new StringBuffer().append(servicekey).append(".").append(methodName).append(".").append(suffix);
         return sb.toString();

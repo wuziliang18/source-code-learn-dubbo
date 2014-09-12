@@ -372,7 +372,11 @@ public final class StringUtils {
             return new HashMap<String, String>();
 	    return parseKeyValuePair(qs, "\\&");
 	}
-	
+	/**
+	 * 拼接服务key group/interface:version   interface必须
+	 * @param ps
+	 * @return
+	 */
 	public static String getServiceKey(Map<String, String> ps) {
 	    StringBuilder buf = new StringBuilder();
         String group = ps.get(Constants.GROUP_KEY);

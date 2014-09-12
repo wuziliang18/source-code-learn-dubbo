@@ -24,16 +24,16 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * URL statistics. (API, Cached, ThreadSafe)
- * 
+ * 保存统计各个接口和方法的调用次数当前调用量 最大调用时间等信息
  * @see com.alibaba.dubbo.rpc.filter.ActiveLimitFilter
  * @see com.alibaba.dubbo.rpc.filter.ExecuteLimitFilter
  * @see com.alibaba.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance
  * @author william.liangf
  */
 public class RpcStatus {
-
+	//服务
     private static final ConcurrentMap<String, RpcStatus> SERVICE_STATISTICS = new ConcurrentHashMap<String, RpcStatus>();
-
+    //方法
     private static final ConcurrentMap<String, ConcurrentMap<String, RpcStatus>> METHOD_STATISTICS = new ConcurrentHashMap<String, ConcurrentMap<String, RpcStatus>>();
 
     /**
@@ -94,7 +94,7 @@ public class RpcStatus {
     }
 
     /**
-     * 
+     * 调用前记录下活动数+1
      * @param url
      */
     public static void beginCount(URL url, String methodName) {
@@ -107,7 +107,7 @@ public class RpcStatus {
     }
 
     /**
-     * 
+     * 调用完成后记录下些数据
      * @param url
      * @param elapsed
      * @param succeeded
@@ -118,20 +118,20 @@ public class RpcStatus {
     }
     
     private static void endCount(RpcStatus status, long elapsed, boolean succeeded) {
-        status.active.decrementAndGet();
-        status.total.incrementAndGet();
-        status.totalElapsed.addAndGet(elapsed);
-        if (status.maxElapsed.get() < elapsed) {
+        status.active.decrementAndGet();//运行的-1
+        status.total.incrementAndGet();//累计一次
+        status.totalElapsed.addAndGet(elapsed);//累加花费的总时间
+        if (status.maxElapsed.get() < elapsed) {//如果花费时间大于记录的 刷新
             status.maxElapsed.set(elapsed);
         }
-        if (succeeded) {
+        if (succeeded) {//刷新可能是最多的成功花费时间
             if (status.succeededMaxElapsed.get() < elapsed) {
                 status.succeededMaxElapsed.set(elapsed);
             }
         } else {
-            status.failed.incrementAndGet();
-            status.failedElapsed.addAndGet(elapsed);
-            if (status.failedMaxElapsed.get() < elapsed) {
+            status.failed.incrementAndGet();//失败记录+1
+            status.failedElapsed.addAndGet(elapsed);//失败花费总时间累加
+            if (status.failedMaxElapsed.get() < elapsed) {//刷新可能是最多的失败花费时间
                 status.failedMaxElapsed.set(elapsed);
             }
         }
@@ -139,21 +139,21 @@ public class RpcStatus {
 
     private final ConcurrentMap<String, Object> values = new ConcurrentHashMap<String, Object>();
 
-    private final AtomicInteger active = new AtomicInteger();
+    private final AtomicInteger active = new AtomicInteger();//活动的计数器begin+ end-1
 
-    private final AtomicLong total = new AtomicLong();
+    private final AtomicLong total = new AtomicLong();//调用总次数每end一次+1
 
-    private final AtomicInteger failed = new AtomicInteger();
+    private final AtomicInteger failed = new AtomicInteger();//失败次数 
 
-    private final AtomicLong totalElapsed = new AtomicLong();
+    private final AtomicLong totalElapsed = new AtomicLong();//花费时间计数每次加花费的时间
 
-    private final AtomicLong failedElapsed = new AtomicLong();
+    private final AtomicLong failedElapsed = new AtomicLong();//失败花费总时间累加
 
-    private final AtomicLong maxElapsed = new AtomicLong();
+    private final AtomicLong maxElapsed = new AtomicLong();//最大花费时间
 
-    private final AtomicLong failedMaxElapsed = new AtomicLong();
+    private final AtomicLong failedMaxElapsed = new AtomicLong();//失败的时候花费的最大时间
 
-    private final AtomicLong succeededMaxElapsed = new AtomicLong();
+    private final AtomicLong succeededMaxElapsed = new AtomicLong();//成功的时候花费的最大时间
     
     private RpcStatus() {}
 
@@ -312,10 +312,10 @@ public class RpcStatus {
      * @return tps
      */
     public long getAverageTps() {
-        if (getTotalElapsed() >= 1000L) {
+        if (getTotalElapsed() >= 1000L) {//如果大于一秒计算出
             return getTotal() / (getTotalElapsed() / 1000L);
         }
-        return getTotal();
+        return getTotal();// 不到1秒直接返回
     }
 
 }
