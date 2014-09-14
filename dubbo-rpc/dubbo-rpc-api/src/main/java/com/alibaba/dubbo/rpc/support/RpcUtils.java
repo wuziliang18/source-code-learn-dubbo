@@ -36,7 +36,11 @@ import com.alibaba.dubbo.rpc.RpcInvocation;
 public class RpcUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcUtils.class);
-
+    /**
+     * 获取invocation要返回的值的类型
+     * @param invocation
+     * @return
+     */
     public static Class<?> getReturnType(Invocation invocation) {
         try {
             if (invocation != null && invocation.getInvoker() != null
@@ -44,8 +48,8 @@ public class RpcUtils {
                     && ! invocation.getMethodName().startsWith("$")) {
                 String service = invocation.getInvoker().getUrl().getServiceInterface();
                 if (service != null && service.length() > 0) {
-                    Class<?> cls = ReflectUtils.forName(service);
-                    Method method = cls.getMethod(invocation.getMethodName(), invocation.getParameterTypes());
+                    Class<?> cls = ReflectUtils.forName(service);//加载接口类
+                    Method method = cls.getMethod(invocation.getMethodName(), invocation.getParameterTypes());//获取实际要调用的方法
                     if (method.getReturnType() == void.class) {
                         return null;
                     }

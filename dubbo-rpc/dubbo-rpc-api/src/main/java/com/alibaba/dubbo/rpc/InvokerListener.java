@@ -20,7 +20,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * InvokerListener. (SPI, Singleton, ThreadSafe)
- * 
+ * 与exportlisterner对应是接口引用的监听
  * @author william.liangf
  */
 @SPI

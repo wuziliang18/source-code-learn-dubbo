@@ -118,7 +118,7 @@ public final class ReflectUtils {
 	public static final Pattern IS_HAS_CAN_METHOD_DESC_PATTERN = Pattern.compile("(?:is|has|can)([A-Z][_a-zA-Z0-9]*)\\(\\)Z");
 	
 	private static final ConcurrentMap<String, Class<?>>  DESC_CLASS_CACHE = new ConcurrentHashMap<String, Class<?>>();
-    
+    //缓存动态加载的class
 	private static final ConcurrentMap<String, Class<?>>  NAME_CLASS_CACHE = new ConcurrentHashMap<String, Class<?>>();
 	    
 	private static final ConcurrentMap<String, Method>  Signature_METHODS_CACHE = new ConcurrentHashMap<String, Method>();
@@ -636,16 +636,16 @@ public final class ReflectUtils {
 	private static Class<?> name2class(ClassLoader cl, String name) throws ClassNotFoundException
 	{
 		int c = 0, index = name.indexOf('[');
-		if( index > 0 )
+		if( index > 0 )//处理数组
 		{
-			c = ( name.length() - index ) / 2;
+			c = ( name.length() - index ) / 2;//判断数组维度
 			name = name.substring(0, index);
 		}
 		if( c > 0 )
-		{
+		{//处理数组类型
 			StringBuilder sb = new StringBuilder();
-			while( c-- > 0 )
-				sb.append("[");
+			while( c-- > 0 )//拼接成class数组格式
+				sb.append("[");//加维数据几个[
 
 			if( "void".equals(name) ) sb.append(JVM_VOID);
 			else if( "boolean".equals(name) ) sb.append(JVM_BOOLEAN);
@@ -660,7 +660,7 @@ public final class ReflectUtils {
 			name = sb.toString();
 		}
 		else
-		{
+		{//简单类型直接返回
 			if( "void".equals(name) ) return void.class;
 			else if( "boolean".equals(name) ) return boolean.class;
 			else if( "byte".equals(name) ) return byte.class;
