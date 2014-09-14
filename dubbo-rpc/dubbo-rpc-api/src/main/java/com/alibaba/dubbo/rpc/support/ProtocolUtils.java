@@ -10,12 +10,23 @@ public class ProtocolUtils {
 
     private ProtocolUtils() {
     }
-
+    /**
+     * 拼接处servicekey 格式group/serviceName:version:port
+     * @param url
+     * @return
+     */
     public static String serviceKey(URL url) {
         return serviceKey(url.getPort(), url.getPath(), url.getParameter(Constants.VERSION_KEY),
                           url.getParameter(Constants.GROUP_KEY));
     }
-
+    /**
+     * 拼接处servicekey 格式group/serviceName:version:port
+     * @param port
+     * @param serviceName
+     * @param serviceVersion
+     * @param serviceGroup
+     * @return
+     */
     public static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
         StringBuilder buf = new StringBuilder();
         if (serviceGroup != null && serviceGroup.length() > 0) {

@@ -84,7 +84,11 @@ public class RpcUtils {
     }
     
     private static final AtomicLong INVOKE_ID = new AtomicLong(0);
-    
+    /**
+     * 获取invocationid
+     * @param inv
+     * @return
+     */
 	public static Long getInvocationId(Invocation inv) {
     	String id = inv.getAttachment(Constants.ID_KEY);
 		return id == null ? null : new Long(id);
@@ -97,10 +101,16 @@ public class RpcUtils {
      */
     public static void attachInvocationIdIfAsync(URL url, Invocation inv){
     	if (isAttachInvocationId(url, inv) && getInvocationId(inv) == null && inv instanceof RpcInvocation) {
+    		//需要添加且没有添加invocationid的时候添加id(要求invocation必须是rpcinvocation)
     		((RpcInvocation)inv).setAttachment(Constants.ID_KEY, String.valueOf(INVOKE_ID.getAndIncrement()));
         }
     }
-    
+    /**
+     * 判断是否需要添加invocationid
+     * @param url
+     * @param invocation
+     * @return
+     */
     private static boolean isAttachInvocationId(URL url , Invocation invocation) {
     	String value = url.getMethodParameter(invocation.getMethodName(), Constants.AUTO_ATTACH_INVOCATIONID_KEY);
     	if ( value == null ) {
@@ -114,7 +124,11 @@ public class RpcUtils {
     		return false;
     	}
     }
-    
+    /**
+     * 如果方法名称为$invoke且Arguments有值从第一个位置获取methodname
+     * @param invocation
+     * @return
+     */
     public static String getMethodName(Invocation invocation){
     	if(Constants.$INVOKE.equals(invocation.getMethodName()) 
                 && invocation.getArguments() != null 
@@ -124,7 +138,11 @@ public class RpcUtils {
         }
     	return invocation.getMethodName();
     }
-
+    /**
+     * 如果方法名称为$invoke且Arguments有值从第3个位置获取Arguments(要求类型是Object[])
+     * @param invocation
+     * @return
+     */
     public static Object[] getArguments(Invocation invocation){
     	if(Constants.$INVOKE.equals(invocation.getMethodName()) 
                 && invocation.getArguments() != null 
@@ -134,7 +152,11 @@ public class RpcUtils {
         }
     	return invocation.getArguments();
     }
-
+    /**
+     * 如果方法名称为$invoke且Arguments有值从第2个位置获取ParameterTypes(要求类型是String[])
+     * @param invocation
+     * @return
+     */
     public static Class<?>[] getParameterTypes(Invocation invocation){
     	if(Constants.$INVOKE.equals(invocation.getMethodName()) 
                 && invocation.getArguments() != null 
@@ -152,7 +174,12 @@ public class RpcUtils {
         }
     	return invocation.getParameterTypes();
     }
-    
+    /**
+     * 判断是否是异步
+     * @param url
+     * @param inv
+     * @return
+     */
     public static boolean isAsync(URL url, Invocation inv) {
     	boolean isAsync ;
     	//如果Java代码中设置优先.
@@ -163,7 +190,12 @@ public class RpcUtils {
     	}
     	return isAsync;
     }
-    
+    /**
+     * 是否只是单路 （不要返回值）
+     * @param url
+     * @param inv
+     * @return
+     */
     public static boolean isOneway(URL url, Invocation inv) {
     	boolean isOneway ;
     	//如果Java代码中设置优先.
