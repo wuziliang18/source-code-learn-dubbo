@@ -298,12 +298,12 @@ public class PojoUtils {
             return null;
         }
         
-        if (type != null && type.isEnum() 
+        if (type != null && type.isEnum() //枚举
         		&& pojo.getClass() == String.class) {
     		return Enum.valueOf((Class<Enum>)type, (String)pojo);
     	}
 
-        if (ReflectUtils.isPrimitives(pojo.getClass())
+        if (ReflectUtils.isPrimitives(pojo.getClass())//基本类型
         		&& ! (type != null && type.isArray()
         				&& type.getComponentType().isEnum()
         				&& pojo.getClass() == String[].class)) {
@@ -319,7 +319,7 @@ public class PojoUtils {
         history.put(pojo, pojo);
         
         if (pojo.getClass().isArray()) {
-        	if (Collection.class.isAssignableFrom(type)) {
+        	if (Collection.class.isAssignableFrom(type)) {//如果是类型是collection的子集 使用了Array这个反射类
         		Class<?> ctype = pojo.getClass().getComponentType();
 	            int len = Array.getLength(pojo);
         		Collection dest = createCollection(type, len);
@@ -330,7 +330,7 @@ public class PojoUtils {
 	                dest.add(value);
 	            }
 	            return dest;
-        	} else {
+        	} else {//应该是普通数组
 	        	Class<?> ctype = (type != null && type.isArray() ? type.getComponentType() : pojo.getClass().getComponentType());
 	            int len = Array.getLength(pojo);
 	            Object dest = Array.newInstance(ctype, len);
@@ -344,7 +344,7 @@ public class PojoUtils {
             }
         }
         
-        if (pojo instanceof Collection<?>) {
+        if (pojo instanceof Collection<?>) {//如果是Collection的实现
         	if (type.isArray()) {
         		Class<?> ctype = type.getComponentType();
                 Collection<Object> src = (Collection<Object>)pojo;

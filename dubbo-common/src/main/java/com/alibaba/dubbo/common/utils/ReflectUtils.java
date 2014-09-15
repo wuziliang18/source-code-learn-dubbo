@@ -122,14 +122,22 @@ public final class ReflectUtils {
 	private static final ConcurrentMap<String, Class<?>>  NAME_CLASS_CACHE = new ConcurrentHashMap<String, Class<?>>();
 	    
 	private static final ConcurrentMap<String, Method>  Signature_METHODS_CACHE = new ConcurrentHashMap<String, Method>();
-	
+	/**
+	 * 判断是否是基本类型 如果是数组判断类型那个是否是
+	 * @param cls
+	 * @return
+	 */
 	public static boolean isPrimitives(Class<?> cls) {
         if (cls.isArray()) {
             return isPrimitive(cls.getComponentType());
         }
         return isPrimitive(cls);
     }
-    
+    /**
+     * 是否是基本类型
+     * @param cls
+     * @return
+     */
 	public static boolean isPrimitive(Class<?> cls) {
         return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class 
                 || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls);
@@ -824,7 +832,13 @@ public final class ReflectUtils {
     		throws NoSuchMethodException, ClassNotFoundException {
     	return findMethodByMethodSignature(clazz, methodName, null);
     }
-    
+    /**
+     * 找到构造函数
+     * @param clazz
+     * @param paramType
+     * @return
+     * @throws NoSuchMethodException
+     */
     public static Constructor<?> findConstructor(Class<?> clazz, Class<?> paramType) throws NoSuchMethodException {
     	Constructor<?> targetConstructor;
 		try {
@@ -927,13 +941,13 @@ public final class ReflectUtils {
                             }
                         }
                     }
-                    cls = cls.getSuperclass();
+                    cls = cls.getSuperclass();//因为getDeclaredFields获取的只是当前类的 不包括父类
                 }
                 return value;
             } catch (Throwable e) {
                 return null;
             }
-        } else {
+        } else {//是不常见的接口 直接返回null
             return null;
         }
     }

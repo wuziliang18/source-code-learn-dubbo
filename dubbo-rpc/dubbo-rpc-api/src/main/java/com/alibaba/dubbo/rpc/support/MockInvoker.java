@@ -44,7 +44,7 @@ import com.alibaba.dubbo.rpc.RpcResult;
  */
 final public class MockInvoker<T> implements Invoker<T> {
 	private final static ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
-    private final static Map<String, Invoker<?>> mocks = new ConcurrentHashMap<String, Invoker<?>>();
+    private final static Map<String, Invoker<?>> mocks = new ConcurrentHashMap<String, Invoker<?>>();//mock和Invoker的对应
     private final static Map<String, Throwable> throwables = new ConcurrentHashMap<String, Throwable>();
     
     private final URL url ;
@@ -65,11 +65,11 @@ final public class MockInvoker<T> implements Invoker<T> {
     		throw new RpcException(new IllegalAccessException("mock can not be null. url :" + url));
     	}
         mock = normallizeMock(URL.decode(mock));
-        if (Constants.RETURN_PREFIX.trim().equalsIgnoreCase(mock.trim())){
+        if (Constants.RETURN_PREFIX.trim().equalsIgnoreCase(mock.trim())){//如果是renturn 直接返回value为null的result
         	RpcResult result = new RpcResult();
         	result.setValue(null);
         	return result;
-        } else if (mock.startsWith(Constants.RETURN_PREFIX)) {
+        } else if (mock.startsWith(Constants.RETURN_PREFIX)) {//如果需要返回具体值
             mock = mock.substring(Constants.RETURN_PREFIX.length()).trim();
             mock = mock.replace('`', '"');
             try {
@@ -88,7 +88,7 @@ final public class MockInvoker<T> implements Invoker<T> {
             	Throwable t = getThrowable(mock);
 				throw new RpcException(RpcException.BIZ_EXCEPTION, t);
             }
-        } else { //impl mock
+        } else { //impl mock 执行真正的调用
              try {
                  Invoker<T> invoker = getInvoker(mock);
                  return invoker.invoke(invocation);
@@ -97,7 +97,11 @@ final public class MockInvoker<T> implements Invoker<T> {
              }
         }
     }
-    
+    /**
+     * 获取异常
+     * @param throwstr
+     * @return
+     */
 	private Throwable getThrowable(String throwstr){
     	Throwable throwable =(Throwable) throwables.get(throwstr);
 		if (throwable != null ){
@@ -107,7 +111,7 @@ final public class MockInvoker<T> implements Invoker<T> {
 			try {
 				Class<?> bizException = ReflectUtils.forName(throwstr);
             	Constructor<?> constructor;
-				constructor = ReflectUtils.findConstructor(bizException, String.class);
+				constructor = ReflectUtils.findConstructor(bizException, String.class);//获取异常的构造函数
 				t = (Throwable) constructor.newInstance(new Object[] {" mocked exception for Service degradation. "});
 				if (throwables.size() < 1000) {
 					throwables.put(throwstr, t);	
@@ -118,20 +122,24 @@ final public class MockInvoker<T> implements Invoker<T> {
 			return t;
 		}
     }
-    
+    /**
+     * 根绝mock获取实际的invoker
+     * @param mockService
+     * @return
+     */
     @SuppressWarnings("unchecked")
 	private Invoker<T> getInvoker(String mockService){
     	Invoker<T> invoker =(Invoker<T>) mocks.get(mockService);
 		if (invoker != null ){
 			return invoker;
 		} else {
-       	 	Class<T> serviceType = (Class<T>)ReflectUtils.forName(url.getServiceInterface());
-            if (ConfigUtils.isDefault(mockService)) {
+       	 	Class<T> serviceType = (Class<T>)ReflectUtils.forName(url.getServiceInterface());//服务接口
+            if (ConfigUtils.isDefault(mockService)) {//如果是默认的 
             	mockService = serviceType.getName() + "Mock";
             }
             
             Class<?> mockClass = ReflectUtils.forName(mockService);
-            if (! serviceType.isAssignableFrom(mockClass)) {
+            if (! serviceType.isAssignableFrom(mockClass)) {//mock必须是接口的实现类 
                 throw new IllegalArgumentException("The mock implemention class " + mockClass.getName() + " not implement interface " + serviceType.getName());
             }
 			
@@ -140,7 +148,7 @@ final public class MockInvoker<T> implements Invoker<T> {
             }
             try {
                 T mockObject = (T) mockClass.newInstance();
-                invoker = proxyFactory.getInvoker(mockObject, (Class<T>)serviceType, url);
+                invoker = proxyFactory.getInvoker(mockObject, (Class<T>)serviceType, url);//从代理工厂中获取真正的调用者
                 if (mocks.size() < 10000) {
                 	mocks.put(mockService, invoker);
                 }
@@ -175,7 +183,7 @@ final public class MockInvoker<T> implements Invoker<T> {
     
     public static Object parseMockValue(String mock, Type[] returnTypes) throws Exception {
         Object value = null;
-        if ("empty".equals(mock)) {
+        if ("empty".equals(mock)) {//如果要求返回空的对象 反射为空对象
             value = ReflectUtils.getEmptyObject(returnTypes != null && returnTypes.length > 0 ? (Class<?>)returnTypes[0] : null);
         } else if ("null".equals(mock)) {
             value = null;
