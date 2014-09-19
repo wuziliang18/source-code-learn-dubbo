@@ -25,7 +25,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 
 /**
  * ListenerExporter
- * 
+ * 针对服务端
  * @author william.liangf
  */
 public class ListenerExporterWrapper<T> implements Exporter<T> {
@@ -34,7 +34,7 @@ public class ListenerExporterWrapper<T> implements Exporter<T> {
 
     private final Exporter<T> exporter;
     
-    private final List<ExporterListener> listeners;
+    private final List<ExporterListener> listeners;//监听list
 
     public ListenerExporterWrapper(Exporter<T> exporter, List<ExporterListener> listeners){
         if (exporter == null) {

@@ -40,10 +40,10 @@ import com.alibaba.dubbo.rpc.support.ProtocolUtils;
 public abstract class AbstractProtocol implements Protocol {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
-
+	//key是serviceKey 保证幂等
 	protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
 
-	//TODO SOFEREFENCE
+	//TODO SOFEREFENCE客户端的invoke列表
     protected final Set<Invoker<?>> invokers = new ConcurrentHashSet<Invoker<?>>();
     
 	protected static String serviceKey(URL url) {

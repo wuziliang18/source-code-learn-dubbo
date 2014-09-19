@@ -71,7 +71,7 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
             public void unexport() {
                 super.unexport();
                 exporterMap.remove(uri);
-                if (runnable != null) {
+                if (runnable != null) {//可能是做些清理操作
                     try {
                         runnable.run();
                     } catch (Throwable t) {
@@ -90,7 +90,7 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
             @Override
             protected Result doInvoke(Invocation invocation) throws Throwable {
                 try {
-                    Result result = tagert.invoke(invocation);
+                    Result result = tagert.invoke(invocation);//实际调用的是从proxyFattory获取的
                     Throwable e = result.getException();
                     if (e != null) {
                         for (Class<?> rpcException : rpcExceptions) {
@@ -126,7 +126,13 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
     }
 
     protected abstract <T> Runnable doExport(T impl, Class<T> type, URL url) throws RpcException;
-
+    /**
+     * 反射出对象
+     * @param type
+     * @param url
+     * @return
+     * @throws RpcException
+     */
     protected abstract <T> T doRefer(Class<T> type, URL url) throws RpcException;
 
 }

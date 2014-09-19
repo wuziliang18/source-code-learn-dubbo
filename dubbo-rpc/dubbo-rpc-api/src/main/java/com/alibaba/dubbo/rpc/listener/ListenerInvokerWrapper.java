@@ -28,7 +28,7 @@ import com.alibaba.dubbo.rpc.Result;
 
 /**
  * ListenerInvoker
- * 
+ * 只针对客户端
  * @author william.liangf
  */
 public class ListenerInvokerWrapper<T> implements Invoker<T> {

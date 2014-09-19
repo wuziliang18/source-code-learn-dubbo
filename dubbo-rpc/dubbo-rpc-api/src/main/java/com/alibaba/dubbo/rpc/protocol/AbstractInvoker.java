@@ -72,7 +72,12 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         this.url = url;
         this.attachment = attachment == null ? null : Collections.unmodifiableMap(attachment);
     }
-    
+    /**
+     * 根据keys装在 attachement
+     * @param url
+     * @param keys
+     * @return
+     */
     private static Map<String, String> convertAttachment(URL url, String[] keys) {
         if (keys == null || keys.length == 0) {
             return null;
@@ -118,7 +123,10 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
     public String toString() {
         return getInterface() + " -> " + (getUrl() == null ? "" : getUrl().toString());
     }
-
+    /**
+     * 完善invocation需要的属性如 invoke和Attachment
+     * 集中处理了错误等
+     */
     public Result invoke(Invocation inv) throws RpcException {
         if(destroyed) {
             throw new RpcException("Rpc invoker for service " + this + " on consumer " + NetUtils.getLocalHost() 
@@ -127,21 +135,21 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         }
         RpcInvocation invocation = (RpcInvocation) inv;
         invocation.setInvoker(this);
-        if (attachment != null && attachment.size() > 0) {
+        if (attachment != null && attachment.size() > 0) {//如果有需要的属性 付给invocation
         	invocation.addAttachmentsIfAbsent(attachment);
         }
         Map<String, String> context = RpcContext.getContext().getAttachments();
-        if (context != null) {
+        if (context != null) {//获取当前全局的属性
         	invocation.addAttachmentsIfAbsent(context);
         }
         if (getUrl().getMethodParameter(invocation.getMethodName(), Constants.ASYNC_KEY, false)){
-        	invocation.setAttachment(Constants.ASYNC_KEY, Boolean.TRUE.toString());
+        	invocation.setAttachment(Constants.ASYNC_KEY, Boolean.TRUE.toString());//标记异步
         }
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
         
         
         try {
-            return doInvoke(invocation);
+            return doInvoke(invocation);//模板方法
         } catch (InvocationTargetException e) { // biz exception
             Throwable te = e.getTargetException();
             if (te == null) {

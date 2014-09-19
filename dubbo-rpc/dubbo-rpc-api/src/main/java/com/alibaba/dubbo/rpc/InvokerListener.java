@@ -21,6 +21,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 /**
  * InvokerListener. (SPI, Singleton, ThreadSafe)
  * 与exportlisterner对应是接口引用的监听
+ * 针对客户端 监听客户端的每一个连接与关闭
  * @author william.liangf
  */
 @SPI

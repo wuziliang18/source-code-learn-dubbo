@@ -31,7 +31,8 @@ import com.alibaba.dubbo.rpc.listener.ListenerInvokerWrapper;
 
 /**
  * ListenerProtocol
- * 
+ * 对注册以外的协议操作包装监听  
+ * 个人心得:对所有连接等关键地方进行监听 这里监听的只是初始化和销毁 没有对invoke之类监听（之前以为会有监听，但实际没有，因为有filter）
  * @author william.liangf
  */
 public class ProtocolListenerWrapper implements Protocol {
@@ -48,7 +49,9 @@ public class ProtocolListenerWrapper implements Protocol {
     public int getDefaultPort() {
         return protocol.getDefaultPort();
     }
-
+    /**
+     * 对注册以外的所有协议export操作包装所有激活的ExporterListener交给ListenerExporterWrapper处理
+     */
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             return protocol.export(invoker);
@@ -57,7 +60,9 @@ public class ProtocolListenerWrapper implements Protocol {
                 Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class)
                         .getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY)));
     }
-
+    /**
+     * 对注册以外的所有协议refer操作包装所有激活的InvokerListener交给ListenerInvokerWrapper处理
+     */
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
         if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
             return protocol.refer(type, url);

@@ -19,7 +19,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * Filter. (SPI, Singleton, ThreadSafe)
- * 
+ * 针对服务端 拦截每一个实际调用
  * @author william.liangf
  */
 @SPI

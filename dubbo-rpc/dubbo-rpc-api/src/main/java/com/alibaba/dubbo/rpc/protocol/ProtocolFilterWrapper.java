@@ -30,7 +30,8 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * ListenerProtocol
- * 
+ * 对注册之外的协议包装拦截器
+ * 拦截invoke 方法 实际调用的是最外层的拦截类 一层层的去拦截最后运行该类构造中的protocol的Invoker
  * @author william.liangf
  */
 public class ProtocolFilterWrapper implements Protocol {
@@ -65,15 +66,22 @@ public class ProtocolFilterWrapper implements Protocol {
     public void destroy() {
         protocol.destroy();
     }
-
+    /**
+     * 构建invoker的链 对invoke方法拦截
+     * @param invoker
+     * @param key
+     * @param group 值为provider，consumer
+     * @return
+     */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
+        //获取合适的活跃的拦截器（根据条件最少要分客户端和服务端）
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         if (filters.size() > 0) {
             for (int i = filters.size() - 1; i >= 0; i --) {
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
-                last = new Invoker<T>() {
+                last = new Invoker<T>() {//重新定义个invoker 用来调用拦截
 
                     public Class<T> getInterface() {
                         return invoker.getInterface();
@@ -88,7 +96,7 @@ public class ProtocolFilterWrapper implements Protocol {
                     }
 
                     public Result invoke(Invocation invocation) throws RpcException {
-                        return filter.invoke(next, invocation);
+                        return filter.invoke(next, invocation);//重点位置 使用拦截层层包装
                     }
 
                     public void destroy() {
