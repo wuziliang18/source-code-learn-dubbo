@@ -70,7 +70,7 @@ public class AccessLogFilter implements Filter {
 
     private static final String  MESSAGE_DATE_FORMAT   = "yyyy-MM-dd HH:mm:ss";
 
-    private static final int LOG_MAX_BUFFER = 5000;
+    private static final int LOG_MAX_BUFFER = 5000;//保存日志最多条数
 
     private static final long LOG_OUTPUT_INTERVAL = 5000;
 
@@ -96,7 +96,7 @@ public class AccessLogFilter implements Filter {
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Append log to " + accesslog);
                             }
-                            if (file.exists()) {
+                            if (file.exists()) {//如果日志文件存在改名
                                 String now = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date());
                                 String last = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date(file.lastModified()));
                                 if (! now.equals(last)) {
@@ -108,7 +108,7 @@ public class AccessLogFilter implements Filter {
                             try {
                                 for(Iterator<String> iterator = logSet.iterator();
                                     iterator.hasNext();
-                                    iterator.remove()) {
+                                    iterator.remove()) {//循环 日志写入文件
                                     writer.write(iterator.next());
                                     writer.write("\r\n");
                                 }
@@ -126,7 +126,9 @@ public class AccessLogFilter implements Filter {
             }
         }
     }
-    
+    /**
+     * 启动写入日志任务，每隔一定间隔启动一次线程任务
+     */
     private void init() {
         if (logFuture == null) {
             synchronized (logScheduled) {
@@ -136,7 +138,11 @@ public class AccessLogFilter implements Filter {
             }
         }
     }
-    
+    /**
+     * 写入日志到队列中
+     * @param accesslog
+     * @param logmessage
+     */
     private void log(String accesslog, String logmessage) {
         init();
         Set<String> logSet = logQueue.get(accesslog);
@@ -192,7 +198,7 @@ public class AccessLogFilter implements Filter {
                 if (ConfigUtils.isDefault(accesslog)) {
                     LoggerFactory.getLogger(ACCESS_LOG_KEY + "." + invoker.getInterface().getName()).info(msg);
                 } else {
-                    log(accesslog, msg);
+                    log(accesslog, msg);//写入文件中
                 }
             }
         } catch (Throwable t) {
