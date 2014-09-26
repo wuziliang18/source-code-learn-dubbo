@@ -32,7 +32,7 @@ import com.alibaba.dubbo.rpc.RpcResult;
 
 /**
  * CompatibleFilter
- * 
+ * 这个好像没有走 也没看到激活注解配置
  * @author william.liangf
  */
 public class CompatibleFilter implements Filter {
@@ -50,10 +50,10 @@ public class CompatibleFilter implements Filter {
                     Object newValue;
                     String serialization = invoker.getUrl().getParameter(Constants.SERIALIZATION_KEY); 
                     if ("json".equals(serialization)
-                            || "fastjson".equals(serialization)){
+                            || "fastjson".equals(serialization)){//是json
                         Type gtype = method.getGenericReturnType();
-                        newValue = PojoUtils.realize(value, type, gtype);
-                    } else if (! type.isInstance(value)) {
+                        newValue = PojoUtils.realize(value, type, gtype);//解析数据
+                    } else if (! type.isInstance(value)) {//如果返回值不是方法的类型 需要解析
                         newValue = PojoUtils.isPojo(type)
                             ? PojoUtils.realize(value, type) 
                             : CompatibleTypeUtils.compatibleTypeConvert(value, type);
@@ -62,7 +62,7 @@ public class CompatibleFilter implements Filter {
                         newValue = value;
                     }
                     if (newValue != value) {
-                        result = new RpcResult(newValue);
+                        result = new RpcResult(newValue);//返回真正的结果
                     }
                 } catch (Throwable t) {
                     logger.warn(t.getMessage(), t);

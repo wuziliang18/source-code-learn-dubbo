@@ -84,7 +84,13 @@ public final class JavaBeanSerializeUtil {
             return result;
         }
     }
-
+    /**
+     * 为obj生成javabean描述，里面的每个属性递归生成
+     * @param descriptor
+     * @param obj
+     * @param accessor
+     * @param cache
+     */
     private static void serializeInternal(JavaBeanDescriptor descriptor, Object obj, JavaBeanAccessor accessor, IdentityHashMap<Object, JavaBeanDescriptor> cache) {
         if (obj == null || descriptor == null) {
             return;
@@ -128,7 +134,7 @@ public final class JavaBeanSerializeUtil {
             } // ~ end of loop map
         } else {
             if (JavaBeanAccessor.isAccessByMethod(accessor)) {
-                Map<String, Method> methods = ReflectUtils.getBeanPropertyReadMethods(obj.getClass());
+                Map<String, Method> methods = ReflectUtils.getBeanPropertyReadMethods(obj.getClass());//获取get（id）bean方法
                 for (Map.Entry<String, Method> entry : methods.entrySet()) {
                     try {
                         Object value = entry.getValue().invoke(obj);
@@ -144,7 +150,7 @@ public final class JavaBeanSerializeUtil {
             } // ~ end of if (JavaBeanAccessor.isAccessByMethod(accessor))
 
             if (JavaBeanAccessor.isAccessByField(accessor)) {
-                Map<String, Field> fields = ReflectUtils.getBeanPropertyFields(obj.getClass());
+                Map<String, Field> fields = ReflectUtils.getBeanPropertyFields(obj.getClass());//获取所有属性
                 for (Map.Entry<String, Field> entry : fields.entrySet()) {
                     if (!descriptor.containsProperty(entry.getKey())) {
                         try {

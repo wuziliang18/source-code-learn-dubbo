@@ -62,7 +62,12 @@ public class PojoUtils {
     private static final ConcurrentMap<String, Method>  NAME_METHODS_CACHE = new ConcurrentHashMap<String, Method>();
     private static final ConcurrentMap<Class<?>, ConcurrentMap<String, Field>> CLASS_FIELD_CACHE = 
         new ConcurrentHashMap<Class<?>, ConcurrentMap<String, Field>>();
-
+    /**
+     *  生成一个任何地方都可以使用的一个对象 
+     * 关键在于对象的处理  除特别几个外 都转换成map
+     * @param objs
+     * @return
+     */
     public static Object[] generalize(Object[] objs) {
         Object[] dests = new Object[objs.length];
         for (int i = 0; i < objs.length; i ++) {
@@ -95,7 +100,13 @@ public class PojoUtils {
     public static Object generalize(Object pojo) {
         return generalize(pojo, new IdentityHashMap<Object, Object>());
     }
-
+    /**
+     * 生成一个任何地方都可以使用的一个对象 
+     * 关键在于对象的处理  除特别几个外 都转换成map
+     * @param pojo
+     * @param history
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private static Object generalize(Object pojo, Map<Object, Object> history) {
         if (pojo == null) {
@@ -107,7 +118,7 @@ public class PojoUtils {
         }
         if (pojo.getClass().isArray() 
         		&& Enum.class.isAssignableFrom(
-        				pojo.getClass().getComponentType())) {
+        				pojo.getClass().getComponentType())) {// 枚举数组
         	int len = Array.getLength(pojo);
         	String[] values = new String[len];
         	for (int i = 0; i < len; i ++) {
@@ -116,11 +127,11 @@ public class PojoUtils {
             return values;
         }
         
-        if (ReflectUtils.isPrimitives(pojo.getClass())) {
+        if (ReflectUtils.isPrimitives(pojo.getClass())) {//基本类型
             return pojo;
         }
 
-        if (pojo instanceof Class) {
+        if (pojo instanceof Class) {//如果是class
             return ((Class)pojo).getName();
         }
 
@@ -136,7 +147,7 @@ public class PojoUtils {
             history.put(pojo, dest);
             for (int i = 0; i < len; i ++) {
                 Object obj = Array.get(pojo, i);
-                dest[i] = generalize(obj, history);
+                dest[i] = generalize(obj, history);//递归
             }
             return dest;
         }
@@ -146,7 +157,7 @@ public class PojoUtils {
             Collection<Object> dest = (pojo instanceof List<?>) ? new ArrayList<Object>(len) : new HashSet<Object>(len);
             history.put(pojo, dest);
             for (Object obj : src) {
-                dest.add(generalize(obj, history));
+                dest.add(generalize(obj, history));//递归
             }
             return dest;
         }
@@ -159,12 +170,14 @@ public class PojoUtils {
             }
             return dest;
         }
+        //下边是处理标准的一个bean转成一个map class保存类全称
         Map<String, Object> map = new HashMap<String, Object>();
         history.put(pojo, map);
         map.put("class", pojo.getClass().getName());
         for (Method method : pojo.getClass().getMethods()) {
-            if (ReflectUtils.isBeanPropertyReadMethod(method)) {
+            if (ReflectUtils.isBeanPropertyReadMethod(method)) {//是一个标准的get或者is方法
                 try {
+                	//保存每一个get的参数
                     map.put(ReflectUtils.getPropertyNameFromBeanReadMethod(method),
                             generalize(method.invoke(pojo), history));
                 } catch (Exception e) {
@@ -177,7 +190,8 @@ public class PojoUtils {
             if (ReflectUtils.isPublicInstanceField(field)) {
                 try {
                     Object fieldValue = field.get(pojo);
-                    // public filed同时也有get/set方法，如果get/set存取的不是前面那个 public field 该如何处理
+                    // public filed同时也有get/set方法，如果get/set存取的不是前面那个 public field 该如何处理 //原文注释
+                    // 这里要求的是一个标准的bean//个人注释
                     if (history.containsKey(pojo)) {
                         Object pojoGenerilizedValue = history.get(pojo);
                         if (pojoGenerilizedValue instanceof Map
@@ -291,7 +305,14 @@ public class PojoUtils {
 
         return result;
     }
-
+    /**
+     * 解析数据 从pojo中
+     * @param pojo数据来源
+     * @param type是目标类型
+     * @param genericType 
+     * @param history 缓存数据和对象的映射
+     * @return
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static Object realize0(Object pojo, Class<?> type, Type genericType, final Map<Object, Object> history) {
         if (pojo == null) {
@@ -307,7 +328,7 @@ public class PojoUtils {
         		&& ! (type != null && type.isArray()
         				&& type.getComponentType().isEnum()
         				&& pojo.getClass() == String[].class)) {
-            return CompatibleTypeUtils.compatibleTypeConvert(pojo, type);
+            return CompatibleTypeUtils.compatibleTypeConvert(pojo, type);//返回要的值 兼容类型的话转换成正确返回值
         }
 
         Object o = history.get(pojo);
@@ -376,7 +397,7 @@ public class PojoUtils {
         	}
         }
         
-        if (pojo instanceof Map<?, ?> && type != null) {
+        if (pojo instanceof Map<?, ?> && type != null) {//对象都会转化成map 所以转化的时候是从map中获取属性 
         	Object className = ((Map<Object, Object>)pojo).get("class");
             if (className instanceof String) {
                 try {
@@ -390,10 +411,10 @@ public class PojoUtils {
             if (! type.isInterface()
                     && ! type.isAssignableFrom(pojo.getClass())){
                 try {
-                    map = (Map<Object,Object>)type.newInstance();
+                    map = (Map<Object,Object>)type.newInstance();//type是map
                 } catch (Exception e) {
                     //ignore error
-                    map = (Map<Object, Object>)pojo;
+                    map = (Map<Object, Object>)pojo;//不是map是普通对象
                 }
             }else {
                 map = (Map<Object, Object>)pojo;
@@ -427,10 +448,10 @@ public class PojoUtils {
         	    Object dest = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[]{type}, new PojoInvocationHandler(map));
                 history.put(pojo, dest);
                 return dest;
-            } else {
+            } else {//是对象 
                 Object dest = newInstance(type);
                 history.put(pojo, dest);
-                for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                for (Map.Entry<Object, Object> entry : map.entrySet()) {//循环赋值
                 	Object key = entry.getKey();
                 	if (key instanceof String) {
 	                    String name = (String) key;
@@ -469,7 +490,7 @@ public class PojoUtils {
 	                    }
                 	}
                 }
-                if (dest instanceof Throwable) {
+                if (dest instanceof Throwable) {//是异常
                     Object message = map.get("message");
                     if (message instanceof String) {
                         try {

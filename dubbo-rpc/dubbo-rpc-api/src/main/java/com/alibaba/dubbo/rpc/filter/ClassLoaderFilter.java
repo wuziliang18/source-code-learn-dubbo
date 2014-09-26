@@ -25,7 +25,7 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * ClassLoaderInvokerFilter
- * 
+ * 切换classloader 正常来说是一个
  * @author william.liangf
  */
 @Activate(group = Constants.PROVIDER, order = -30000)
@@ -33,7 +33,7 @@ public class ClassLoaderFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         ClassLoader ocl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(invoker.getInterface().getClassLoader());
+        Thread.currentThread().setContextClassLoader(invoker.getInterface().getClassLoader());//实际上就是当前的
         try {
             return invoker.invoke(invocation);
         } finally {

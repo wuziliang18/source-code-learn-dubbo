@@ -27,7 +27,7 @@ import com.alibaba.dubbo.rpc.RpcStatus;
 
 /**
  * ThreadLimitInvokerFilter
- * 
+ * 服务端计数
  * @author william.liangf
  */
 @Activate(group = Constants.PROVIDER, value = Constants.EXECUTES_KEY)
@@ -44,8 +44,8 @@ public class ExecuteLimitFilter implements Filter {
             }
         }
         long begin = System.currentTimeMillis();
-        boolean isException = false;
-        RpcStatus.beginCount(url, methodName);
+        boolean isException = false;//用来标记 是否出错
+        RpcStatus.beginCount(url, methodName);//计数
         try {
             Result result = invoker.invoke(invocation);
             return result;
@@ -59,7 +59,7 @@ public class ExecuteLimitFilter implements Filter {
             }
         }
         finally {
-            RpcStatus.endCount(url, methodName, System.currentTimeMillis() - begin, isException);
+            RpcStatus.endCount(url, methodName, System.currentTimeMillis() - begin, isException);//计数 或者记录可能的错误
         }
     }
 

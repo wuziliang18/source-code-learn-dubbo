@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -43,7 +44,7 @@ import com.alibaba.dubbo.common.utils.ReflectUtils;
 
 /**
  * ClassGenerator
- * 
+ * 利用javassis生成java类
  * @author qian.lei
  */
 
@@ -93,7 +94,7 @@ public final class ClassGenerator
 
 	private String mClassName, mSuperClass;
 
-	private Set<String> mInterfaces;
+	private Set<String> mInterfaces;//保存接口名称
 
 	private List<String> mFields, mConstructors, mMethods;
 
@@ -185,13 +186,29 @@ public final class ClassGenerator
 	{
 		return addMethod(name, mod, rt, pts, null, body);
 	}
-
+	/**
+	 * 生成方法的代码
+	 * 
+	public org.dubbo.api.bean.Person getPerson(long arg0) {
+		Object[] args = new Object[1];
+		args[0] = ($w) $1;
+		Object ret = handler.invoke(this, methods[0], args);
+		return (org.dubbo.api.bean.Person) ret;
+	}
+	 * @param name
+	 * @param mod
+	 * @param rt
+	 * @param pts
+	 * @param ets
+	 * @param body
+	 * @return
+	 */
 	public ClassGenerator addMethod(String name, int mod, Class<?> rt, Class<?>[] pts, Class<?>[] ets, String body)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(modifier(mod)).append(' ').append(ReflectUtils.getName(rt)).append(' ').append(name);
+		sb.append(modifier(mod)).append(' ').append(ReflectUtils.getName(rt)).append(' ').append(name);//  拼接修饰符　返回值　方法名
 		sb.append('(');
-		for(int i=0;i<pts.length;i++)
+		for(int i=0;i<pts.length;i++)// 参数
 		{
 			if( i > 0 )
 				sb.append(',');
@@ -199,7 +216,7 @@ public final class ClassGenerator
 			sb.append(" arg").append(i);
 		}
 		sb.append(')');
-		if( ets != null && ets.length > 0 )
+		if( ets != null && ets.length > 0 )//异常
 		{
 			sb.append(" throws ");
 			for(int i=0;i<ets.length;i++)
@@ -380,7 +397,11 @@ public final class ClassGenerator
 	{
 		return getCtClass(c.getDeclaringClass()).getConstructor(ReflectUtils.getDesc(c));
 	}
-
+	/**
+	 * 修饰符转成实际代码　如ｐｕｂｌｉｃ
+	 * @param mod
+	 * @return
+	 */
 	private static String modifier(int mod)
 	{
 		if( Modifier.isPublic(mod) ) return "public";

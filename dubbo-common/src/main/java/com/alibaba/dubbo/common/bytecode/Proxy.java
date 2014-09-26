@@ -148,10 +148,10 @@ public abstract class Proxy
 		{
 			ccp = ClassGenerator.newInstance(cl);
 
-			Set<String> worked = new HashSet<String>();
-			List<Method> methods = new ArrayList<Method>();
+			Set<String> worked = new HashSet<String>();//保存方法
+			List<Method> methods = new ArrayList<Method>();//保存方法的具体类
 
-			for(int i=0;i<ics.length;i++)
+			for(int i=0;i<ics.length;i++)//接口的处理
 			{
 				if( !Modifier.isPublic(ics[i].getModifiers()) )
 				{
@@ -168,14 +168,14 @@ public abstract class Proxy
 				}
 				ccp.addInterface(ics[i]);
 
-				for( Method method : ics[i].getMethods() )
+				for( Method method : ics[i].getMethods() )//方法的处理
 				{
-					String desc = ReflectUtils.getDesc(method);
+					String desc = ReflectUtils.getDesc(method);//获取方法描述
 					if( worked.contains(desc) )
 						continue;
 					worked.add(desc);
 
-					int ix = methods.size();
+					int ix = methods.size();//标记当前方法在列表中的位置
 					Class<?> rt = method.getReturnType();
 					Class<?>[] pts = method.getParameterTypes();
 

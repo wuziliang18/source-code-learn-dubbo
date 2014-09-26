@@ -58,11 +58,11 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
         T proxy = proxyFactory.getProxy(invoker);
-        if (GenericService.class != invoker.getInterface()) {
+        if (GenericService.class != invoker.getInterface()) {//如果是泛化的
             String stub = invoker.getUrl().getParameter(Constants.STUB_KEY, invoker.getUrl().getParameter(Constants.LOCAL_KEY));
             if (ConfigUtils.isNotEmpty(stub)) {
                 Class<?> serviceType = invoker.getInterface();
-                if (ConfigUtils.isDefault(stub)) {
+                if (ConfigUtils.isDefault(stub)) {//如果是默认的配置
                     if (invoker.getUrl().hasParameter(Constants.STUB_KEY)) {
                         stub = serviceType.getName() + "Stub";
                     } else {
@@ -70,8 +70,8 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
                     }
                 }
                 try {
-                    Class<?> stubClass = ReflectUtils.forName(stub);
-                    if (! serviceType.isAssignableFrom(stubClass)) {
+                    Class<?> stubClass = ReflectUtils.forName(stub);//查找存根类（stub或者local结尾）
+                    if (! serviceType.isAssignableFrom(stubClass)) {//如果不是存根的父类
                         throw new IllegalStateException("The stub implemention class " + stubClass.getName() + " not implement interface " + serviceType.getName());
                     }
                     try {
@@ -83,7 +83,7 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
                             url = url.addParameter(Constants.STUB_EVENT_METHODS_KEY, StringUtils.join(Wrapper.getWrapper(proxy.getClass()).getDeclaredMethodNames(), ","));
                             url = url.addParameter(Constants.IS_SERVER_KEY, Boolean.FALSE.toString());
                             try{
-                                export(proxy, (Class)invoker.getInterface(), url);
+                                export(proxy, (Class)invoker.getInterface(), url);// 此处不太懂 可能是客户端独享的
                             }catch (Exception e) {
                                 LOGGER.error("export a stub service error.", e);
                             }

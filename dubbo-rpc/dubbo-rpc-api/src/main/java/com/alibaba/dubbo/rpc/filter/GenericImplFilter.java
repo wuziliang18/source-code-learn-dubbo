@@ -40,7 +40,7 @@ import com.alibaba.dubbo.rpc.support.ProtocolUtils;
 
 /**
  * GenericImplInvokerFilter
- * 
+ * 客户端使用
  * @author william.liangf
  */
 @Activate(group = Constants.CONSUMER, value = Constants.GENERIC_KEY, order = 20000)
@@ -52,7 +52,7 @@ public class GenericImplFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String generic = invoker.getUrl().getParameter(Constants.GENERIC_KEY);
-        if (ProtocolUtils.isGeneric(generic)
+        if (ProtocolUtils.isGeneric(generic)//泛型处理
                 && ! Constants.$INVOKE.equals(invocation.getMethodName())
                 && invocation instanceof RpcInvocation) {
             RpcInvocation invocation2 = (RpcInvocation) invocation;
@@ -69,10 +69,10 @@ public class GenericImplFilter implements Filter {
             if (ProtocolUtils.isBeanGenericSerialization(generic)) {
                 args = new Object[arguments.length];
                 for(int i = 0; i < arguments.length; i++) {
-                    args[i] = JavaBeanSerializeUtil.serialize(arguments[i], JavaBeanAccessor.METHOD);
+                    args[i] = JavaBeanSerializeUtil.serialize(arguments[i], JavaBeanAccessor.METHOD);//生成一个包含对象各种属性的一个描述符对象
                 }
             } else {
-                args = PojoUtils.generalize(arguments);
+                args = PojoUtils.generalize(arguments);//生成一个可以广泛使用的对象数组每一个参数除特别类型外 都转成map
             }
             
             invocation2.setMethodName(Constants.$INVOKE);

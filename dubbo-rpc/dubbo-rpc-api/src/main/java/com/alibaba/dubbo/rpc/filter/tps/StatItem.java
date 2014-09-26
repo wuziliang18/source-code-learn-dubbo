@@ -46,7 +46,7 @@ class StatItem {
 
     public boolean isAllowable(URL url, Invocation invocation) {
         long now = System.currentTimeMillis();
-        if (now > lastResetTime + interval) {
+        if (now > lastResetTime + interval) {//每个时段一刷新token总数
             token.set(rate);
             lastResetTime = now;
         }
@@ -54,11 +54,11 @@ class StatItem {
         int value = token.get();
         boolean flag = false;
         while (value > 0 && !flag) {
-            flag = token.compareAndSet(value, value - 1);
+            flag = token.compareAndSet(value, value - 1);//判断token的值有没有被其他线程修改
             value = token.get();
         }
 
-        return flag;
+        return flag;// 没有被其他线程修改且value可用（大于0 ）返回true  如果被修改且减到0的时候返回false
     }
 
     long getLastResetTime() {

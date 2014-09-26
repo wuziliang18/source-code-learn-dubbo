@@ -28,7 +28,7 @@ import com.alibaba.dubbo.rpc.RpcInvocation;
  */
 public class InvokerInvocationHandler implements InvocationHandler {
 
-    private final Invoker<?> invoker;
+    private final Invoker<?> invoker;//利用invoker来反射方法
     
     public InvokerInvocationHandler(Invoker<?> handler){
         this.invoker = handler;
@@ -40,16 +40,16 @@ public class InvokerInvocationHandler implements InvocationHandler {
         if (method.getDeclaringClass() == Object.class) {//如果是object的方法调用
             return method.invoke(invoker, args);
         }
-        if ("toString".equals(methodName) && parameterTypes.length == 0) {
+        if ("toString".equals(methodName) && parameterTypes.length == 0) {//默认的toString方法
             return invoker.toString();
         }
-        if ("hashCode".equals(methodName) && parameterTypes.length == 0) {
+        if ("hashCode".equals(methodName) && parameterTypes.length == 0) {//默认的hashCode方法
             return invoker.hashCode();
         }
-        if ("equals".equals(methodName) && parameterTypes.length == 1) {
+        if ("equals".equals(methodName) && parameterTypes.length == 1) {//默认的equals方法
             return invoker.equals(args[0]);
         }
-        return invoker.invoke(new RpcInvocation(method, args)).recreate();
+        return invoker.invoke(new RpcInvocation(method, args)).recreate();//使用invoke对象代理
     }
 
 }

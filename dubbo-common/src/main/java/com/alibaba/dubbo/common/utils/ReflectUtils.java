@@ -216,7 +216,11 @@ public final class ReflectUtils {
 			if( !isCompatible(cs[i], os[i]) ) return false;
 		return true;
 	}
-	
+	/**
+	 * 获取class位置
+	 * @param cls
+	 * @return
+	 */
 	public static String getCodeBase(Class<?> cls) {
 	    if (cls == null)
 	        return null;
@@ -951,7 +955,11 @@ public final class ReflectUtils {
             return null;
         }
     }
-
+    /**
+     * 判断是否是一个标准的get方法
+     * @param method
+     * @return
+     */
     public static boolean isBeanPropertyReadMethod(Method method) {
         return method != null
             && Modifier.isPublic(method.getModifiers())
@@ -962,7 +970,11 @@ public final class ReflectUtils {
             && ((method.getName().startsWith("get") && method.getName().length() > 3)
                     || (method.getName().startsWith("is") && method.getName().length() > 2));
     }
-
+    /**
+     * 截取一个get（可能是is）方法的field
+     * @param method
+     * @return
+     */
     public static String getPropertyNameFromBeanReadMethod(Method method) {
         if (isBeanPropertyReadMethod(method)) {
             if (method.getName().startsWith("get")) {

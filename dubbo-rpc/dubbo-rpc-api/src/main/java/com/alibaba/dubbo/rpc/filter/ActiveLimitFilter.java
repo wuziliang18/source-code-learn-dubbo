@@ -27,7 +27,9 @@ import com.alibaba.dubbo.rpc.RpcStatus;
 
 /**
  * LimitInvokerFilter
- * 
+ * 客户端
+ * 判断是否已经是最大的活动并发
+ *  如果是等待唤醒或者超时 唤醒后可能正常运行
  * @author william.liangf
  */
 @Activate(group = Constants.CONSUMER, value = Constants.ACTIVES_KEY)
@@ -43,11 +45,11 @@ public class ActiveLimitFilter implements Filter {
             long start = System.currentTimeMillis();
             long remain = timeout;
             int active = count.getActive();
-            if (active >= max) {
-                synchronized (count) {
+            if (active >= max) {//超过最大活动数了
+                synchronized (count) {//等待最大活动数减小到正常  如果超时抛异常
                     while ((active = count.getActive()) >= max) {
                         try {
-                            count.wait(remain);
+                            count.wait(remain);//用wait很巧妙 因为会有唤醒 看finally
                         } catch (InterruptedException e) {
                         }
                         long elapsed = System.currentTimeMillis() - start;
@@ -65,17 +67,17 @@ public class ActiveLimitFilter implements Filter {
         }
         try {
             long begin = System.currentTimeMillis();
-            RpcStatus.beginCount(url, methodName);
+            RpcStatus.beginCount(url, methodName);//开始计数
             try {
                 Result result = invoker.invoke(invocation);
-                RpcStatus.endCount(url, methodName, System.currentTimeMillis() - begin, true);
+                RpcStatus.endCount(url, methodName, System.currentTimeMillis() - begin, true);////结束计数
                 return result;
             } catch (RuntimeException t) {
-                RpcStatus.endCount(url, methodName, System.currentTimeMillis() - begin, false);
+                RpcStatus.endCount(url, methodName, System.currentTimeMillis() - begin, false);////结束计数 记录错误
                 throw t;
             }
         } finally {
-            if(max>0){
+            if(max>0){//很巧妙 唤醒可能已经超过max等待的线程
                 synchronized (count) {
                     count.notify();
                 } 
