@@ -30,7 +30,8 @@ import com.alibaba.dubbo.remoting.exchange.ResponseFuture;
 
 /**
  * dubbo protocol support class.
- * 
+ * 正常情况下没有调用 共用连接的时候才会用到
+ * 主要是为了防止 共用的时候 错误的关闭客户端连接后 建一个幽灵连接LazyConnectExchangeClient 如果还有要调用的会重连
  * @author chao.liuc
  */
 @SuppressWarnings("deprecation")
@@ -42,14 +43,14 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
     
 //    private final ExchangeHandler handler;
     
-    private final AtomicInteger refenceCount = new AtomicInteger(0);
+    private final AtomicInteger refenceCount = new AtomicInteger(0);//连接过来+1 断开-1
     
     private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap;
     
     
     public ReferenceCountExchangeClient(ExchangeClient client, ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap) {
         this.client = client;
-        refenceCount.incrementAndGet();
+        refenceCount.incrementAndGet();//每个连接过来+1
         this.url = client.getUrl();
         if (ghostClientMap == null){
             throw new IllegalStateException("ghostClientMap can not be null, url: " + url);
@@ -132,7 +133,7 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
     }
 
     public void close(int timeout) {
-        if (refenceCount.decrementAndGet() <= 0){
+        if (refenceCount.decrementAndGet() <= 0){//没有幂等 如果多次可能会有问题 因为多个关闭（每次调用减1）可能导致没有完全完事就关闭了 
             if (timeout == 0){
                 client.close();
             } else {
