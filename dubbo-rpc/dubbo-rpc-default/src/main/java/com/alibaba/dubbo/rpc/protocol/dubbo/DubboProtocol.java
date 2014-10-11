@@ -65,7 +65,7 @@ public class DubboProtocol extends AbstractProtocol {
     public static final int DEFAULT_PORT = 20880;
     
     public final ReentrantLock lock = new ReentrantLock();
-    
+    //保存server key是 ip+端口号
     private final Map<String, ExchangeServer> serverMap = new ConcurrentHashMap<String, ExchangeServer>(); // <host:port,Exchanger>
     
     private final Map<String, ReferenceCountExchangeClient> referenceClientMap = new ConcurrentHashMap<String, ReferenceCountExchangeClient>(); // <host:port,Exchanger>
@@ -73,7 +73,7 @@ public class DubboProtocol extends AbstractProtocol {
     private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap = new ConcurrentHashMap<String, LazyConnectExchangeClient>();
     
     //consumer side export a stub service for dispatching event
-    //servicekey-stubmethods
+    //servicekey-stubmethods wuzl export的时候如果是stub保存
     private final ConcurrentMap<String, String> stubServiceMethodsMap = new ConcurrentHashMap<String, String>();
     
     private static final String IS_CALLBACK_SERVICE_INVOKE = "_isCallBackServiceInvoke";
@@ -162,7 +162,7 @@ public class DubboProtocol extends AbstractProtocol {
     
     private static DubboProtocol INSTANCE;
 
-    public DubboProtocol() {
+    public DubboProtocol() {//给ExtensionLoader 使用 的
         INSTANCE = this;
     }
     
@@ -181,7 +181,7 @@ public class DubboProtocol extends AbstractProtocol {
         return Collections.unmodifiableCollection(exporterMap.values());
     }
     
-    Map<String, Exporter<?>> getExporterMap(){
+    Map<String, Exporter<?>> getExporterMap(){//似乎没有被调用 不安全的方法
         return exporterMap;
     }
     
@@ -260,7 +260,10 @@ public class DubboProtocol extends AbstractProtocol {
         
         return exporter;
     }
-    
+    /**
+     * 开启服务 如果没有服务 新建一个  有的话重置
+     * @param url
+     */
     private void openServer(URL url) {
         // find server.
         String key = url.getAddress();
@@ -283,10 +286,10 @@ public class DubboProtocol extends AbstractProtocol {
         //默认开启heartbeat
         url = url.addParameterIfAbsent(Constants.HEARTBEAT_KEY, String.valueOf(Constants.DEFAULT_HEARTBEAT));
         String str = url.getParameter(Constants.SERVER_KEY, Constants.DEFAULT_REMOTING_SERVER);
-
+        //检查服务类型是否存在 默认是netty
         if (str != null && str.length() > 0 && ! ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str))
             throw new RpcException("Unsupported server type: " + str + ", url: " + url);
-
+        //选择codec
         url = url.addParameter(Constants.CODEC_KEY, Version.isCompatibleVersion() ? COMPATIBLE_CODEC_NAME : DubboCodec.NAME);
         ExchangeServer server;
         try {

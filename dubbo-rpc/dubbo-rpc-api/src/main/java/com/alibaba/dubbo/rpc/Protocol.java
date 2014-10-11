@@ -36,7 +36,7 @@ public interface Protocol {
 
     /**
      * 暴露远程服务：<br>
-     * 1. 协议在接收请求时，应记录请求来源方地址信息：RpcContext.getContext().setRemoteAddress();<br>
+     * 1. 协议在接收请求时，应记录请求来源方地址信息：RpcContext.getContext().setRemoteAddress();<br> ?此处是为了返回结果吗
      * 2. export()必须是幂等的，也就是暴露同一个URL的Invoker两次，和暴露一次没有区别。<br>
      * 3. export()传入的Invoker由框架实现并传入，协议不需要关心。<br>
      * 
@@ -44,6 +44,8 @@ public interface Protocol {
      * @param invoker 服务的执行体
      * @return exporter 暴露服务的引用，用于取消暴露
      * @throws RpcException 当暴露服务出错时抛出，比如端口已占用
+     * 
+     * wuzl 每个服务调用一次
      */
     @Adaptive
     <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
