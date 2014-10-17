@@ -36,7 +36,7 @@ import com.alibaba.dubbo.remoting.exchange.ResponseFuture;
 /**
  * dubbo protocol support class.
  * 包装但应该是最底层的由这个类去连接服务端 对请求进行warn记录和提示 
- * 但正常情况下没有使用！！！ 共用连接的时候才会用到
+ * 延迟连接client
  * @author chao.liuc
  */
 @SuppressWarnings("deprecation")
@@ -51,7 +51,7 @@ final class LazyConnectExchangeClient implements ExchangeClient{
     //lazy connect 如果没有初始化时的连接状态
     private final boolean                 initialState ;
     
-    protected final  boolean requestWithWarning;
+    protected final  boolean requestWithWarning;//请求的时候是否警告
     
     //当调用时warning，出现这个warning，表示程序可能存在bug.
     static final  String REQUEST_WITH_WARNING_KEY = "lazyclient_request_with_warning";
@@ -68,7 +68,7 @@ final class LazyConnectExchangeClient implements ExchangeClient{
     
     /**
      * 初始化连接
-     * 没有连接的时候Exchangers去连接
+     * 没有连接的时候Exchangers去连接 加锁保证
      * @throws RemotingException
      */
     private void initClient() throws RemotingException {

@@ -43,7 +43,7 @@ import com.alibaba.dubbo.rpc.support.RpcUtils;
  */
 public class DubboInvoker<T> extends AbstractInvoker<T> {
 
-    private final ExchangeClient[]      clients;
+    private final ExchangeClient[]      clients;//连接 默认只会有一个共享连接
 
     private final AtomicPositiveInteger index = new AtomicPositiveInteger();
 

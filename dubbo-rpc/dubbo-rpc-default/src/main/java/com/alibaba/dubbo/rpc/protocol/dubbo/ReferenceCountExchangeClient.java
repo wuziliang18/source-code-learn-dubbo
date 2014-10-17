@@ -139,7 +139,7 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
             } else {
                 client.close(timeout);
             }
-            client = replaceWithLazyClient();
+            client = replaceWithLazyClient();//保留一个幽灵连接 防止意外关闭
         }
     }
     
@@ -166,7 +166,9 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
     public boolean isClosed() {
         return client.isClosed();
     }
-    
+    /**
+     * 计数 有多少个连接在贡献一个
+     */
     public void incrementAndGetCount(){
         refenceCount.incrementAndGet();
     }

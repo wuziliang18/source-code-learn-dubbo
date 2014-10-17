@@ -53,7 +53,9 @@ public abstract class AbstractProtocol implements Protocol {
 	protected static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
 		return ProtocolUtils.serviceKey(port, serviceName, serviceVersion, serviceGroup);
 	}
-	
+	/**
+	 * 抽象类中负责关闭invokers和export
+	 */
 	public void destroy() {
 	    for (Invoker<?> invoker : invokers){
 	        if (invoker != null) {

@@ -67,7 +67,7 @@ public class DubboProtocol extends AbstractProtocol {
     public final ReentrantLock lock = new ReentrantLock();
     //保存server key是 ip+端口号
     private final Map<String, ExchangeServer> serverMap = new ConcurrentHashMap<String, ExchangeServer>(); // <host:port,Exchanger>
-    
+    //保存每个服务端的客户端连接 key是服务端的host:port
     private final Map<String, ReferenceCountExchangeClient> referenceClientMap = new ConcurrentHashMap<String, ReferenceCountExchangeClient>(); // <host:port,Exchanger>
     
     private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap = new ConcurrentHashMap<String, LazyConnectExchangeClient>();
@@ -239,7 +239,7 @@ public class DubboProtocol extends AbstractProtocol {
         // export service.
         String key = serviceKey(url);
         DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
-        exporterMap.put(key, exporter);
+        exporterMap.put(key, exporter);//为了 关闭export的时候 删除这个export
         
         //export an stub service for dispaching event
         Boolean isStubSupportEvent = url.getParameter(Constants.STUB_EVENT_KEY,Constants.DEFAULT_STUB_EVENT);
@@ -279,7 +279,11 @@ public class DubboProtocol extends AbstractProtocol {
         	}
         }
     }
-    
+    /**
+     * 启动服务（如netty）
+     * @param url
+     * @return
+     */
     private ExchangeServer createServer(URL url) {
         //默认开启server关闭时发送readonly事件
         url = url.addParameterIfAbsent(Constants.CHANNEL_READONLYEVENT_SENT_KEY, Boolean.TRUE.toString());
@@ -293,12 +297,12 @@ public class DubboProtocol extends AbstractProtocol {
         url = url.addParameter(Constants.CODEC_KEY, Version.isCompatibleVersion() ? COMPATIBLE_CODEC_NAME : DubboCodec.NAME);
         ExchangeServer server;
         try {
-            server = Exchangers.bind(url, requestHandler);
+            server = Exchangers.bind(url, requestHandler);//启动服务
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);
         }
         str = url.getParameter(Constants.CLIENT_KEY);
-        if (str != null && str.length() > 0) {
+        if (str != null && str.length() > 0) {//如果配置了client这个参数 要判断是否有这个传输协议
             Set<String> supportedTypes = ExtensionLoader.getExtensionLoader(Transporter.class).getSupportedExtensions();
             if (!supportedTypes.contains(str)) {
                 throw new RpcException("Unsupported client type: " + str);
@@ -313,7 +317,11 @@ public class DubboProtocol extends AbstractProtocol {
         invokers.add(invoker);
         return invoker;
     }
-    
+    /**
+     * 获取连接数组  默认是共享连接 所以只有一个
+     * @param url
+     * @return
+     */
     private ExchangeClient[] getClients(URL url){
         //是否共享连接
         boolean service_share_connect = false;
@@ -336,25 +344,25 @@ public class DubboProtocol extends AbstractProtocol {
     }
     
     /**
-     *获取共享连接 
+     *获取共享连接 只新建一个连接 
      */
     private ExchangeClient getSharedClient(URL url){
         String key = url.getAddress();
         ReferenceCountExchangeClient client = referenceClientMap.get(key);
-        if ( client != null ){
+        if ( client != null ){//如果有连接且没有关闭 使用这个连接
             if ( !client.isClosed()){
-                client.incrementAndGetCount();
+                client.incrementAndGetCount();//计数
                 return client;
-            } else {
+            } else {//连接关闭删除这个连接 下边会新建
 //                logger.warn(new IllegalStateException("client is closed,but stay in clientmap .client :"+ client));
                 referenceClientMap.remove(key);
             }
         }
-        ExchangeClient exchagneclient = initClient(url);
+        ExchangeClient exchagneclient = initClient(url);//新建个连接
         
-        client = new ReferenceCountExchangeClient(exchagneclient, ghostClientMap);
+        client = new ReferenceCountExchangeClient(exchagneclient, ghostClientMap);//共享连接
         referenceClientMap.put(key, client);
-        ghostClientMap.remove(key);
+        ghostClientMap.remove(key);//新建连接后 不再需要幽灵连接了
         return client; 
     }
 
@@ -368,6 +376,7 @@ public class DubboProtocol extends AbstractProtocol {
 
         String version = url.getParameter(Constants.DUBBO_VERSION_KEY);
         boolean compatible = (version != null && version.startsWith("1.0."));
+        //加入codec的名称 主要是老版本兼容
         url = url.addParameter(Constants.CODEC_KEY, Version.isCompatibleVersion() && compatible ? COMPATIBLE_CODEC_NAME : DubboCodec.NAME);
         //默认开启heartbeat
         url = url.addParameterIfAbsent(Constants.HEARTBEAT_KEY, String.valueOf(Constants.DEFAULT_HEARTBEAT));
@@ -380,11 +389,11 @@ public class DubboProtocol extends AbstractProtocol {
         
         ExchangeClient client ;
         try {
-            //设置连接应该是lazy的 
+            //判断是否是延迟连接
             if (url.getParameter(Constants.LAZY_CONNECT_KEY, false)){
-                client = new LazyConnectExchangeClient(url ,requestHandler);
+                client = new LazyConnectExchangeClient(url ,requestHandler);//新建一个延迟连接 里面的新建连接与下边的一样
             } else {
-                client = Exchangers.connect(url ,requestHandler);
+                client = Exchangers.connect(url ,requestHandler);//直接新建连接
             }
         } catch (RemotingException e) {
             throw new RpcException("Fail to create remoting client for service(" + url
@@ -394,7 +403,7 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     public void destroy() {
-        for (String key : new ArrayList<String>(serverMap.keySet())) {
+        for (String key : new ArrayList<String>(serverMap.keySet())) {//关闭每个服务
             ExchangeServer server = serverMap.remove(key);
             if (server != null) {
                 try {
@@ -408,7 +417,7 @@ public class DubboProtocol extends AbstractProtocol {
             }
         }
         
-        for (String key : new ArrayList<String>(referenceClientMap.keySet())) {
+        for (String key : new ArrayList<String>(referenceClientMap.keySet())) {//关闭每个客户端连接
             ExchangeClient client = referenceClientMap.remove(key);
             if (client != null) {
                 try {
@@ -422,7 +431,7 @@ public class DubboProtocol extends AbstractProtocol {
             }
         }
         
-        for (String key : new ArrayList<String>(ghostClientMap.keySet())) {
+        for (String key : new ArrayList<String>(ghostClientMap.keySet())) {//关闭每个幽灵连接
             ExchangeClient client = ghostClientMap.remove(key);
             if (client != null) {
                 try {
@@ -435,7 +444,7 @@ public class DubboProtocol extends AbstractProtocol {
                 }
             }
         }
-        stubServiceMethodsMap.clear();
+        stubServiceMethodsMap.clear();//清楚stub
         super.destroy();
     }
 }
