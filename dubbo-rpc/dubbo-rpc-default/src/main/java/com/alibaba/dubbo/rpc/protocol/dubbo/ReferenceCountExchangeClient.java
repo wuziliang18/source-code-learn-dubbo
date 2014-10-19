@@ -133,7 +133,10 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
     }
 
     public void close(int timeout) {
-        if (refenceCount.decrementAndGet() <= 0){//没有幂等 如果多次可能会有问题 因为多个关闭（每次调用减1）可能导致没有完全完事就关闭了 
+    	//?没有幂等 如果多次可能会有问题 因为多个关闭（每次调用减1）可能导致没有完全完事就关闭了 
+    	//实际情况下是在invoke关闭client的时候做的检查 保证了不会多次关闭
+    	//似乎多关闭了一次
+        if (refenceCount.decrementAndGet() <= 0){
             if (timeout == 0){
                 client.close();
             } else {

@@ -120,17 +120,17 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         if (super.isDestroyed()){
             return ;
         } else {
-            //dubbo check ,避免多次关闭
+            //dubbo check ,避免多次关闭 因为多次关闭会影响ReferenceCountExchangeClient的close
             destroyLock.lock();
             try{
-                if (super.isDestroyed()){
+                if (super.isDestroyed()){//加锁后 再次判断 防止多次关闭 
                     return ;
                 }
-                super.destroy();
+                super.destroy();//做些标记而已
                 if (invokers != null){
                     invokers.remove(this);
                 }
-                for (ExchangeClient client : clients) {
+                for (ExchangeClient client : clients) {//默认情况下是共享连接 实际只有一个连接  但每次关闭invoke 的时候会调用ReferenceCountExchangeClient的close连接-1 到0彻底关闭
                     try {
                         client.close();
                     } catch (Throwable t) {
