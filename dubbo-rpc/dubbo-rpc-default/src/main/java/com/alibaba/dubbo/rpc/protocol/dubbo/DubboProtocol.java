@@ -67,7 +67,7 @@ public class DubboProtocol extends AbstractProtocol {
     public final ReentrantLock lock = new ReentrantLock();
     //保存server key是 ip+端口号
     private final Map<String, ExchangeServer> serverMap = new ConcurrentHashMap<String, ExchangeServer>(); // <host:port,Exchanger>
-    //保存每个服务端的客户端连接 key是服务端的host:port
+    //保存每个服务端的共享客户端连接 key是服务端的host:port
     private final Map<String, ReferenceCountExchangeClient> referenceClientMap = new ConcurrentHashMap<String, ReferenceCountExchangeClient>(); // <host:port,Exchanger>
     
     private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap = new ConcurrentHashMap<String, LazyConnectExchangeClient>();
@@ -335,7 +335,7 @@ public class DubboProtocol extends AbstractProtocol {
         ExchangeClient[] clients = new ExchangeClient[connections];
         for (int i = 0; i < clients.length; i++) {
             if (service_share_connect){
-                clients[i] = getSharedClient(url);
+                clients[i] = getSharedClient(url);//共享连接只有一个 循环一次
             } else {
                 clients[i] = initClient(url);
             }
@@ -403,6 +403,7 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     public void destroy() {
+    	//wuzl个人感觉应该把 super.destroy();放到前边 因为下边的关闭共享client会多关闭一次
         for (String key : new ArrayList<String>(serverMap.keySet())) {//关闭每个服务
             ExchangeServer server = serverMap.remove(key);
             if (server != null) {
@@ -417,7 +418,7 @@ public class DubboProtocol extends AbstractProtocol {
             }
         }
         
-        for (String key : new ArrayList<String>(referenceClientMap.keySet())) {//关闭每个客户端连接
+        for (String key : new ArrayList<String>(referenceClientMap.keySet())) {//关闭每个客户端与单一服务端的共享连接 此处似乎可以省略
             ExchangeClient client = referenceClientMap.remove(key);
             if (client != null) {
                 try {

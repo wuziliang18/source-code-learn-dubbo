@@ -67,11 +67,11 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
     public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
     protected Object decodeBody(Channel channel, InputStream is, byte[] header) throws IOException {
-        byte flag = header[2], proto = (byte) (flag & SERIALIZATION_MASK);
+        byte flag = header[2], proto = (byte) (flag & SERIALIZATION_MASK);//排除请求状态的干扰 获取真正的序列化id
         Serialization s = CodecSupport.getSerialization(channel.getUrl(), proto);
         // get request id.
         long id = Bytes.bytes2long(header, 4);
-        if ((flag & FLAG_REQUEST) == 0) {
+        if ((flag & FLAG_REQUEST) == 0) {//是response
             // decode response.
             Response res = new Response(id);
             if ((flag & FLAG_EVENT) != 0) {
@@ -114,7 +114,7 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
                 res.setErrorMessage(deserialize(s, channel.getUrl(), is).readUTF());
             }
             return res;
-        } else {
+        } else {//request
             // decode request.
             Request req = new Request(id);
             req.setVersion("2.0.0");

@@ -58,13 +58,13 @@ public class ExchangeCodec extends TelnetCodec {
     protected static final byte     MAGIC_LOW          = Bytes.short2bytes(MAGIC)[1];
 
     // message flag.
-    protected static final byte     FLAG_REQUEST       = (byte) 0x80;//占高8位
+    protected static final byte     FLAG_REQUEST       = (byte) 0x80;//占第8位 标记是请求
 
-    protected static final byte     FLAG_TWOWAY        = (byte) 0x40;//占高8位
+    protected static final byte     FLAG_TWOWAY        = (byte) 0x40;//占第7位 标记要返回结果
 
-    protected static final byte     FLAG_EVENT     = (byte) 0x20;//占高8位
+    protected static final byte     FLAG_EVENT     = (byte) 0x20;//占第6位 心跳
 
-    protected static final int      SERIALIZATION_MASK = 0x1f;
+    protected static final int      SERIALIZATION_MASK = 0x1f;//用来去除上边三个标志位的干扰
 
     public Short getMagicCode() {
         return MAGIC;

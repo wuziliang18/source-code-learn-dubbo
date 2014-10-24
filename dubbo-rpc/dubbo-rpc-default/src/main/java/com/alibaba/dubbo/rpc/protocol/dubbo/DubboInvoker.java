@@ -43,7 +43,7 @@ import com.alibaba.dubbo.rpc.support.RpcUtils;
  */
 public class DubboInvoker<T> extends AbstractInvoker<T> {
 
-    private final ExchangeClient[]      clients;//连接 默认只会有一个共享连接
+    private final ExchangeClient[]      clients;//连接 默认只会有一个共享连接 如果单独配置连接 clients就是单独的连接数组
 
     private final AtomicPositiveInteger index = new AtomicPositiveInteger();
 
@@ -82,16 +82,16 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
             boolean isAsync = RpcUtils.isAsync(getUrl(), invocation);
             boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
             int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY,Constants.DEFAULT_TIMEOUT);
-            if (isOneway) {
+            if (isOneway) {//单路 的发出去后不再管了
             	boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
                 currentClient.send(inv, isSent);
                 RpcContext.getContext().setFuture(null);
                 return new RpcResult();
-            } else if (isAsync) {
+            } else if (isAsync) {//异步的 绑定到ResponseFuture
             	ResponseFuture future = currentClient.request(inv, timeout) ;
                 RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));
                 return new RpcResult();
-            } else {
+            } else {//同步的等待返回值
             	RpcContext.getContext().setFuture(null);
                 return (Result) currentClient.request(inv, timeout).get();
             }
@@ -106,7 +106,7 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
     public boolean isAvailable() {
         if (!super.isAvailable())
             return false;
-        for (ExchangeClient client : clients){
+        for (ExchangeClient client : clients){//只要有一个链接活着就是好的
             if (client.isConnected() && !client.hasAttribute(Constants.CHANNEL_ATTRIBUTE_READONLY_KEY)){
                 //cannot write == not Available ?
                 return true ;
@@ -114,7 +114,9 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         }
         return false;
     }
-
+    /**
+     * 关闭client 
+     */
     public void destroy() {
         //防止client被关闭多次.在connect per jvm的情况下，client.close方法会调用计数器-1，当计数器小于等于0的情况下，才真正关闭
         if (super.isDestroyed()){
@@ -130,7 +132,11 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
                 if (invokers != null){
                     invokers.remove(this);
                 }
-                for (ExchangeClient client : clients) {//默认情况下是共享连接 实际只有一个连接  但每次关闭invoke 的时候会调用ReferenceCountExchangeClient的close连接-1 到0彻底关闭
+                /**
+                 * 默认情况下是共享连接 实际只有一个连接  但每次关闭invoke 的时候会调用ReferenceCountExchangeClient的close连接-1 到0彻底关闭
+                 * 配置单独连接数的时候 是正常关闭
+                 */
+                for (ExchangeClient client : clients) {
                     try {
                         client.close();
                     } catch (Throwable t) {
