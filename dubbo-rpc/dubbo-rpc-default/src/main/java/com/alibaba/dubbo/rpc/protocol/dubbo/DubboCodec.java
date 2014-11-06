@@ -44,7 +44,7 @@ import static com.alibaba.dubbo.rpc.protocol.dubbo.CallbackServiceCodec.encodeIn
 
 /**
  * Dubbo codec.
- *
+ *解析消息体 
  * @author qianlei
  * @author chao.liuc
  */
@@ -177,11 +177,11 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
         out.writeUTF(inv.getAttachment(Constants.VERSION_KEY));
 
         out.writeUTF(inv.getMethodName());
-        out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
+        out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));//写入参数类型数组
         Object[] args = inv.getArguments();
         if (args != null)
         for (int i = 0; i < args.length; i++){
-            out.writeObject(encodeInvocationArgument(channel, inv, i));
+            out.writeObject(encodeInvocationArgument(channel, inv, i));//写入具体参数值 如果方法的参数有回调 写入null Attachments保存
         }
         out.writeObject(inv.getAttachments());
     }

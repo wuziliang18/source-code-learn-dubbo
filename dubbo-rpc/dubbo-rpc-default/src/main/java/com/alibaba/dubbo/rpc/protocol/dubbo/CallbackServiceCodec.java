@@ -50,7 +50,13 @@ class CallbackServiceCodec {
     private static final byte CALLBACK_CREATE = 0x1;
     private static final byte CALLBACK_DESTROY = 0x2;
     private static final String INV_ATT_CALLBACK_KEY  = "sys_callback_arg-";
-    
+    /**
+     * 判断是否有某个方法某个参数的回调方法
+     * @param url
+     * @param methodName
+     * @param argIndex
+     * @return
+     */
     private static byte isCallBack(URL url, String methodName ,int argIndex){
         //参数callback的规则是 方法名称.参数index(0开始).callback
         byte isCallback = CALLBACK_NONE;
@@ -78,7 +84,7 @@ class CallbackServiceCodec {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static String exportOrunexportCallbackService(Channel channel, URL url, Class clazz, Object inst, Boolean export) throws IOException{
-        int instid = System.identityHashCode(inst);
+        int instid = System.identityHashCode(inst);//内存地址生成的hasecode
         
         Map<String,String> params = new HashMap<String,String>(3);
         //不需要在重新new client
@@ -101,7 +107,7 @@ class CallbackServiceCodec {
         //同一个jvm不需要对不同的channel产生多个exporter cache key不会碰撞 
         String cacheKey = getClientSideCallbackServiceCacheKey(instid);
         String countkey = getClientSideCountKey(clazz.getName());
-        if(export){
+        if(export){//正常回调
             //同一个channel 可以有多个callback instance. 不同的instance不重新export
             if( ! channel.hasAttribute(cacheKey)){
                 if (!isInstancesOverLimit(channel, url, clazz.getName(), instid, false)) {
@@ -114,7 +120,7 @@ class CallbackServiceCodec {
                     increaseInstanceCount(channel, countkey);
                 }
             }
-        }else {
+        }else {//失效的回调
             if(channel.hasAttribute(cacheKey)){
                 Exporter<?> exporter = (Exporter<?>) channel.getAttribute(cacheKey);
                 exporter.unexport();
@@ -207,6 +213,11 @@ class CallbackServiceCodec {
             return false;
         }
     }
+    /**
+     * 实例计数加1
+     * @param channel
+     * @param countkey
+     */
     private static void increaseInstanceCount(Channel channel, String countkey){
         try{
             //ignore cuncurrent problem? 
@@ -221,6 +232,11 @@ class CallbackServiceCodec {
             logger.error(e.getMessage(), e);
         }
     }
+    /**
+     * 实例技术减1
+     * @param channel
+     * @param countkey
+     */
     private static void decreaseInstanceCount(Channel channel, String countkey){
         try{
             Integer count = (Integer)channel.getAttribute(countkey);
@@ -234,7 +250,14 @@ class CallbackServiceCodec {
             logger.error(e.getMessage(), e);
         }
     }
-    
+    /**
+     * 
+     * @param channel
+     * @param inv
+     * @param paraIndex 方法参数的位置 
+     * @return
+     * @throws IOException
+     */
     public static Object encodeInvocationArgument(Channel channel, RpcInvocation inv, int paraIndex) throws IOException{
         //encode时可直接获取url
         URL url = inv.getInvoker() == null ? null : inv.getInvoker().getUrl();

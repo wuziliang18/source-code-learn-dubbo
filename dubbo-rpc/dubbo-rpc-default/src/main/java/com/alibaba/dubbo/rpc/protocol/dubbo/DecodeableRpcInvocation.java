@@ -114,7 +114,7 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
                     }
                 }
             }
-            setParameterTypes(pts);
+            setParameterTypes(pts);//方法参数类型
 
             Map<String, String> map = (Map<String, String>) in.readObject(Map.class);
             if (map != null && map.size() > 0) {
@@ -130,7 +130,7 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
                 args[i] = decodeInvocationArgument(channel, this, pts, i, args[i]);
             }
 
-            setArguments(args);
+            setArguments(args);//参数具体
 
         } catch (ClassNotFoundException e) {
             throw new IOException(StringUtils.toString("Read invocation data failed.", e));

@@ -42,15 +42,15 @@ public final class DubboCountCodec implements Codec2 {
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
         int save = buffer.readerIndex();
         MultiMessage result = MultiMessage.create();
-        do {
+        do {//多次解析数据  结果合并到MultiMessage 似乎没用到
             Object obj = codec.decode(channel, buffer);
             if (Codec2.DecodeResult.NEED_MORE_INPUT == obj) {
-                buffer.readerIndex(save);
+                buffer.readerIndex(save);//保持读的位置
                 break;
             } else {
                 result.addMessage(obj);
                 logMessageLength(obj, buffer.readerIndex() - save);
-                save = buffer.readerIndex();
+                save = buffer.readerIndex();//获取读取的位置
             }
         } while (true);
         if (result.isEmpty()) {
@@ -61,7 +61,11 @@ public final class DubboCountCodec implements Codec2 {
         }
         return result;
     }
-
+    /**
+     * 在request或response中记录读写数据大小
+     * @param result
+     * @param bytes
+     */
     private void logMessageLength(Object result, int bytes) {
         if (bytes <= 0) { return; }
         if (result instanceof Request) {

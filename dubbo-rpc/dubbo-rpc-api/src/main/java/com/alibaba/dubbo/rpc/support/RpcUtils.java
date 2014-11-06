@@ -61,7 +61,11 @@ public class RpcUtils {
         }
         return null;
     }
-
+    /**
+     * 返回方法的返回类型 第一个是类型 第二个带泛型
+     * @param invocation
+     * @return
+     */
     public static Type[] getReturnTypes(Invocation invocation) {
         try {
             if (invocation != null && invocation.getInvoker() != null

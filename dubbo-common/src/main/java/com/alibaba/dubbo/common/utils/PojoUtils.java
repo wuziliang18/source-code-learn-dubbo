@@ -518,7 +518,7 @@ public class PojoUtils {
     private static Type getGenericClassByIndex(Type genericType, int index){
         Type clazz = null ;
         //范型参数转换 
-        if (genericType instanceof ParameterizedType){
+        if (genericType instanceof ParameterizedType){// 泛型类型     
             ParameterizedType t = (ParameterizedType)genericType;
             Type[] types = t.getActualTypeArguments();
             clazz = types[index];

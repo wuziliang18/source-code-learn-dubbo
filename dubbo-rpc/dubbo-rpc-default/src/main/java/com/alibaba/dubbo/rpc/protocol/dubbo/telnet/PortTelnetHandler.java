@@ -63,7 +63,7 @@ public class PortTelnetHandler implements TelnetHandler {
                     buf.append(server.getUrl().getPort());
                 }
             }
-        } else {
+        } else {//如果参数中有端口 则显示的是连接这个端口上的客户端
             int p = Integer.parseInt(port);
             ExchangeServer server = null;
             for (ExchangeServer s : DubboProtocol.getDubboProtocol().getServers()) {

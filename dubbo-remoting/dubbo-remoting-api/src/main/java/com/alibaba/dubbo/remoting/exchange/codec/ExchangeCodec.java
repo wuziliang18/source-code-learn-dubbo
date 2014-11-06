@@ -39,7 +39,7 @@ import com.alibaba.dubbo.remoting.transport.CodecSupport;
 
 /**
  * ExchangeCodec.
- * 
+ * 应该是只是解析了消息头
  * @author qianlei
  * @author william.liangf
  */

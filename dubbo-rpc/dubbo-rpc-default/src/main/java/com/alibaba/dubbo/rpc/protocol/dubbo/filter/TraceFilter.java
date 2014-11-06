@@ -37,7 +37,7 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * TraceFilter
- * 
+ * 在tracers中的chanel打印要跟踪的服务调用
  * @author william.liangf
  */
 @Activate(group = Constants.PROVIDER)
@@ -48,9 +48,15 @@ public class TraceFilter implements Filter {
     private static final String TRACE_MAX = "trace.max";
     
     private static final String TRACE_COUNT = "trace.count";
-    
+    //保存根据的服务所在channel
     private static final ConcurrentMap<String, Set<Channel>> tracers = new ConcurrentHashMap<String, Set<Channel>>();
-    
+    /**
+     * 加入到跟踪中
+     * @param type
+     * @param method
+     * @param channel
+     * @param max
+     */
     public static void addTracer(Class<?> type, String method, Channel channel, int max) {
         channel.setAttribute(TRACE_MAX, max);
         channel.setAttribute(TRACE_COUNT, new AtomicInteger());
@@ -62,7 +68,12 @@ public class TraceFilter implements Filter {
         }
         channels.add(channel);
     }
-    
+    /**
+     * 从跟踪列表中移除
+     * @param type
+     * @param method
+     * @param channel
+     */
     public static void removeTracer(Class<?> type, String method, Channel channel) {
         channel.removeAttribute(TRACE_MAX);
         channel.removeAttribute(TRACE_COUNT);
@@ -77,7 +88,7 @@ public class TraceFilter implements Filter {
         long start = System.currentTimeMillis();
         Result result = invoker.invoke(invocation);
         long end = System.currentTimeMillis();
-        if (tracers.size() > 0) {
+        if (tracers.size() > 0) {//如果有需要跟踪的 
             String key = invoker.getInterface().getName() + "." + invocation.getMethodName();
             Set<Channel> channels = tracers.get(key);
             if (channels == null || channels.size() == 0) {
@@ -99,7 +110,7 @@ public class TraceFilter implements Filter {
                                 c = new AtomicInteger();
                                 channel.setAttribute(TRACE_COUNT, c);
                             }
-                            count = c.getAndIncrement();
+                            count = c.getAndIncrement();//强制线程同步
                             if (count < max) {
                                 String prompt = channel.getUrl().getParameter(Constants.PROMPT_KEY, Constants.DEFAULT_PROMPT);
                                 channel.send("\r\n" + RpcContext.getContext().getRemoteAddress() + " -> "  

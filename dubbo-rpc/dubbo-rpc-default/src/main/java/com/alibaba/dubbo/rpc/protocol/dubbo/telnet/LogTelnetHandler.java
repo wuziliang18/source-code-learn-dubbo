@@ -50,9 +50,9 @@ public class LogTelnetHandler implements TelnetHandler {
             buf.append("EXAMPLE: log error / log 100");
         }else {
             String str[] = message.split(" ");
-            if (! StringUtils.isInteger(str[0])){
+            if (! StringUtils.isInteger(str[0])){//设置日志级别
                 LoggerFactory.setLevel(Level.valueOf(message.toUpperCase()));
-            } else {
+            } else {//打印日志
                 int SHOW_LOG_LENGTH = Integer.parseInt(str[0]);
                 
                 if (file != null && file.exists()) {

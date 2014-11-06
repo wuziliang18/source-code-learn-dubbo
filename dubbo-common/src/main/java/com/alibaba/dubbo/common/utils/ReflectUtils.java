@@ -781,7 +781,7 @@ public final class ReflectUtils {
 		Matcher m = DESC_PATTERN.matcher(desc);
 		while(m.find())
 			cs.add(desc2class(cl, m.group()));
-		return cs.toArray(EMPTY_CLASS_ARRAY);
+		return cs.toArray(EMPTY_CLASS_ARRAY);//使用EMPTY_CLASS_ARRAY是为了泛型
 	}
 
 	/**
