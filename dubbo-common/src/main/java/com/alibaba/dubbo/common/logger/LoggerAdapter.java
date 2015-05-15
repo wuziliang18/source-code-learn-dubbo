@@ -21,7 +21,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * 日志输出器供给器
- *
+ * 全局的日志管理 就是为什么在Logger外多包装了一层 来输出管理所有的Logger
  * @author william.liangf
  */
 @SPI

@@ -93,7 +93,7 @@ public class ExtensionLoader<T> {
 
     private String cachedDefaultName;//默认扩展点的名称
 
-    private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();//扩展适配器对象
+    private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();//扩展适配器对象 wuzl 使用适配可以根据url中动态修改实际调用类解耦
     private volatile Throwable createAdaptiveInstanceError;//生成扩展适配器时出现的错误
 
     private Set<Class<?>> cachedWrapperClasses;//扩展点实现的包装类Wrapper集合
@@ -622,7 +622,7 @@ public class ExtensionLoader<T> {
 	    return clazz;
 	}
 	/**
-	 * 获取扩展实现类
+	 * 获取加载扩展实现类
 	 * key是扩展实现类名称
 	 * value是扩展实现类
 	 * @return

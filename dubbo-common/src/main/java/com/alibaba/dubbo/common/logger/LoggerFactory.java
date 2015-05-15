@@ -37,7 +37,7 @@ public class LoggerFactory {
 	private LoggerFactory() {
 	}
 
-	private static volatile LoggerAdapter LOGGER_ADAPTER;//日志输出器供给器
+	private static volatile LoggerAdapter LOGGER_ADAPTER;//全局的日志输出器供给器
 	//缓存每个用到日志类的日志输出器 不包括LoggerFactory
 	private static final ConcurrentMap<String, FailsafeLogger> LOGGERS = new ConcurrentHashMap<String, FailsafeLogger>();
 

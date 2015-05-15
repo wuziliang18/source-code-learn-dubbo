@@ -18,6 +18,8 @@ package com.alibaba.dubbo.common.extension;
 /**
  * ExtensionFactory
  * 扩展点本身的加载容器，可从不同容器加载扩展点。
+ * 
+ * wuzl 似乎是配置spring容器之类
  * @author william.liangf
  * @export
  */

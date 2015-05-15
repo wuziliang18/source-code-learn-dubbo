@@ -19,7 +19,7 @@ import com.alibaba.dubbo.common.Version;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.utils.NetUtils;
 /**
- * 包装类 为了保证日志出现问题 但不影响正常使用！！！
+ * 包装类适配 为了保证日志出现问题 但不影响正常使用！！！ 
  * 最初糊涂后来发现这是种方案 很巧妙 对性能有好处 还使用了简单的模板
  * @author wuzl
  *
