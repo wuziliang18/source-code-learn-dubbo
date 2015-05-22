@@ -63,11 +63,11 @@ public class ExtensionLoader<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExtensionLoader.class);
     
-    private static final String SERVICES_DIRECTORY = "META-INF/services/";
+    private static final String SERVICES_DIRECTORY = "META-INF/services/";//存放dubbo扩展信息的配置文件所在目录
 
-    private static final String DUBBO_DIRECTORY = "META-INF/dubbo/";
+    private static final String DUBBO_DIRECTORY = "META-INF/dubbo/";//存放dubbo扩展信息的配置文件所在目录
     
-    private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
+    private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";//存放dubbo扩展信息的配置文件所在目录
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
     
@@ -83,7 +83,7 @@ public class ExtensionLoader<T> {
 
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();//扩展实现类和对应名称,注意不保存扩展类和包装类
     
-    private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String,Class<?>>>();//保存扩展实现类
+    private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String,Class<?>>>();//保存扩展实现类 与上边的cachedNames key value相反
 
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();//自动激活的扩展实现,value是Activate注解
 
@@ -689,7 +689,7 @@ public class ExtensionLoader<T> {
             }
             if (urls != null) {
             	/*3.递归读取扩展类*/
-                while (urls.hasMoreElements()) {
+                while (urls.hasMoreElements()) {//多个配置文件 因为扩展实现有多个可能在不同包内
                     java.net.URL url = urls.nextElement();
                     try {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
@@ -742,7 +742,7 @@ public class ExtensionLoader<T> {
                                                 } catch (NoSuchMethodException e) {
                                                 	/*3.1.3.2.2该实现没有有拷贝构造函数，是正常的扩展类*/
                                                     clazz.getConstructor();//此方法似乎多余,只是限制了扩展实现类必须有无参的构造
-                                                    if (name == null || name.length() == 0) {
+                                                    if (name == null || name.length() == 0) {//wuzl老版本兼容
                                                         name = findAnnotationName(clazz);//根据注解和扩展实现类名称来获取name
                                                         if (name == null || name.length() == 0) {
                                                             if (clazz.getSimpleName().length() > type.getSimpleName().length()//这里的代码应该与findAnnotationName合并
