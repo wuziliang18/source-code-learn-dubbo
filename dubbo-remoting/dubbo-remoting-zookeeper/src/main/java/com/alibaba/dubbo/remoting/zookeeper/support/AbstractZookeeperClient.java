@@ -14,7 +14,7 @@ import com.alibaba.dubbo.remoting.zookeeper.StateListener;
 import com.alibaba.dubbo.remoting.zookeeper.ZookeeperClient;
 /**
  * client的抽象
- *
+ * 用了很漂亮的泛型
  * @param <TargetChildListener>
  */
 public abstract class AbstractZookeeperClient<TargetChildListener> implements ZookeeperClient {
@@ -41,7 +41,7 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 	 */
 	public void create(String path, boolean ephemeral) {
 		int i = path.lastIndexOf('/');
-		if (i > 0) {//递归建造目录
+		if (i > 0) {//递归建造目录物理的
 			create(path.substring(0, i), false);
 		}
 		if (ephemeral) {

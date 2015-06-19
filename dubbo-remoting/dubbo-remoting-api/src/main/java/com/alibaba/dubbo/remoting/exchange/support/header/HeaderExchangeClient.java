@@ -38,7 +38,7 @@ import com.alibaba.dubbo.remoting.exchange.ResponseFuture;
 
 /**
  * DefaultMessageClient
- * 
+ * 启动心跳线程
  * @author william.liangf
  * @author chao.liuc
  */
@@ -48,7 +48,7 @@ public class HeaderExchangeClient implements ExchangeClient {
 
     private static final ScheduledThreadPoolExecutor scheduled = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("dubbo-remoting-client-heartbeat", true));
 
-    // 心跳定时器
+    // 心跳定时器future
     private ScheduledFuture<?> heatbeatTimer;
 
     // 心跳超时，毫秒。缺省0，不会执行心跳。

@@ -134,7 +134,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
 
     public void send(Object message, boolean sent) throws RemotingException {
         Collection<Channel> channels = getChannels();
-        for (Channel channel : channels) {
+        for (Channel channel : channels) {//给所有的通道发送信息wuzl个人感觉是因为server端发信息应该是全局的所以给全部
             if (channel.isConnected()) {
                 channel.send(message, sent);
             }
@@ -152,7 +152,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
             logger.warn(e.getMessage(), e);
         }
         try {
-            doClose();
+            doClose();//模板方法
         } catch (Throwable e) {
             logger.warn(e.getMessage(), e);
         }
@@ -181,8 +181,8 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
 
     @Override
     public void connected(Channel ch) throws RemotingException {
-        Collection<Channel> channels = getChannels();
-        if (accepts > 0 && channels.size() > accepts) {
+        Collection<Channel> channels = getChannels();//调用的抽象方法  由子类实现
+        if (accepts > 0 && channels.size() > accepts) {// 如果连接数过多了 不接受新的接入  关闭通道
             logger.error("Close channel " + ch + ", cause: The server " + ch.getLocalAddress() + " connections greater than max config " + accepts);
             ch.close();
             return;

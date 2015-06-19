@@ -33,7 +33,7 @@ import com.alibaba.dubbo.remoting.telnet.support.TelnetUtils;
 
 /**
  * StatusTelnetHandler
- * 
+ * 查看各种状态 负载cpu 注册中心等
  * @author william.liangf
  */
 @Activate

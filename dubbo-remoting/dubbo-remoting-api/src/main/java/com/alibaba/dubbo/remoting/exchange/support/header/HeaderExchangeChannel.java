@@ -33,7 +33,8 @@ import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 
 /**
  * ExchangeReceiver
- * 
+ * 信息交换 同步转异步  client用的是request send方法似乎没有用 
+ * close的时候等待所有信息处理完毕才能close
  * @author william.liangf
  */
 final class HeaderExchangeChannel implements ExchangeChannel {

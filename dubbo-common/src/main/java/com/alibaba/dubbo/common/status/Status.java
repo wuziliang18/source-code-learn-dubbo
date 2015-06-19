@@ -17,7 +17,7 @@ package com.alibaba.dubbo.common.status;
 
 /**
  * Status
- * 
+ * 系统的一些状态 如内存检查 cpu使用情况等
  * @author william.liangf
  */
 public class Status {

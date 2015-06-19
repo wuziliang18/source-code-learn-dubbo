@@ -32,13 +32,14 @@ import com.alibaba.dubbo.remoting.RemotingException;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
 /**
  * 包装的一个chanelhandler 提供线程池给子类调度用 具体操作可以看子类的覆盖
+ * 适配
  * @author wuzl
  *
  */
 public class WrappedChannelHandler implements ChannelHandlerDelegate {
     
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);
-    //初始化线程池
+    //初始化共享的线程池
     protected static final ExecutorService SHARED_EXECUTOR = Executors.newCachedThreadPool(new NamedThreadFactory("DubboSharedHandler", true));
     //对象独自的线程池
     protected final ExecutorService executor;

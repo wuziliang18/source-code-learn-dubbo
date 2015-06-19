@@ -20,7 +20,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * ChannelHandler. (API, Prototype, ThreadSafe)
- * 对channel的处理和加工 多种继承和实现及包装形成链式
+ * 对channel的处理和加工 多种继承和实现及包装形成链式  都是监听方法
  * @see com.alibaba.dubbo.remoting.Transporter#bind(com.alibaba.dubbo.common.URL, ChannelHandler)
  * @see com.alibaba.dubbo.remoting.Transporter#connect(com.alibaba.dubbo.common.URL, ChannelHandler)
  * @author qian.lei

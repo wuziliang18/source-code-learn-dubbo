@@ -39,7 +39,7 @@ import com.alibaba.dubbo.remoting.transport.CodecSupport;
 
 /**
  * ExchangeCodec.
- * 应该是只是解析了消息头
+ * 解析消息头
  * @author qianlei
  * @author william.liangf
  */
@@ -239,8 +239,8 @@ public class ExchangeCodec extends TelnetCodec {
         Bytes.long2bytes(req.getId(), header, 4);//占5-12位
 
         // encode request data.
-        int savedWriteIndex = buffer.writerIndex();
-        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
+        int savedWriteIndex = buffer.writerIndex();//记录写的位置
+        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);//空出写header的位置 准备写入数据
         ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);//写入数据会从buffer后边开始写入 留16位给header
         ObjectOutput out = serialization.serialize(channel.getUrl(), bos);
         if (req.isEvent()) {
@@ -256,9 +256,9 @@ public class ExchangeCodec extends TelnetCodec {
         Bytes.int2bytes(len, header, 12);//写入数据长度
 
         // write
-        buffer.writerIndex(savedWriteIndex);
-        buffer.writeBytes(header); // write header.此处似乎有问题 从0位置开始写入之前的会被覆盖只能有一个消息头
-        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
+        buffer.writerIndex(savedWriteIndex);//充值写的索引在空出给header的位置
+        buffer.writeBytes(header); 
+        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);//跳到写的位置，包括请求的数据
     }
 
     protected void encodeResponse(Channel channel, ChannelBuffer buffer, Response res) throws IOException {

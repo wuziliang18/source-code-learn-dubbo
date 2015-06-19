@@ -83,7 +83,7 @@ public class TelnetCodec extends TransportCodec {
 
     public void encode(Channel channel, ChannelBuffer buffer, Object message) throws IOException {
         if (message instanceof String) {
-            if (isClientSide(channel)) {//命令行输入的都是client 调用的都是服务端的
+            if (isClientSide(channel)) {//命令行输入的都是client 调用的都是服务端的 
                 message = message + "\r\n";
             }
             byte[] msgData = ((String) message).getBytes(getCharset(channel).name());
@@ -99,7 +99,15 @@ public class TelnetCodec extends TransportCodec {
         buffer.readBytes(message);
         return decode(channel, buffer, readable, message);
     }
-
+    /**
+     * 只有telnet的时候才会被使用 其他时候被子类层层重写
+     * @param channel
+     * @param buffer
+     * @param readable
+     * @param message
+     * @return
+     * @throws IOException
+     */
     @SuppressWarnings("unchecked")
     protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] message) throws IOException {
         if (isClientSide(channel)) {//如果是客户端

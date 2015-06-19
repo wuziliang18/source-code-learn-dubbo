@@ -44,7 +44,8 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelHandlers;
 
 /**
  * AbstractClient
- * 
+ * 每一个连接一个新的client
+ * 默认是共享一个连接 也就是一个client
  * @author qian.lei
  * @author chao.liuc
  */
@@ -57,12 +58,12 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     private static final AtomicInteger CLIENT_THREAD_POOL_ID = new AtomicInteger();
 
     private final Lock            connectLock = new ReentrantLock();
-    //可以定时执行任务的线程池 两个线程容量
+    //可以定时执行任务的线程池 两个线程容量 最大不限
     private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("DubboClientReconnectTimer", true));
     //ScheduledExecutorService中提交了任务的返回结果
     private volatile  ScheduledFuture<?> reconnectExecutorFuture = null;
     
-    protected volatile ExecutorService executor;
+    protected volatile ExecutorService executor;//客户端与每一个服务端的共享连接池
     
     private final boolean send_reconnect ;
     
@@ -91,7 +92,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         reconnect_warning_period = url.getParameter("reconnect.waring.period", 1800);
         
         try {
-            doOpen();
+            doOpen();//调用子类模板
         } catch (Throwable t) {
             close();
             throw new RemotingException(url.toInetSocketAddress(), null, 
@@ -134,12 +135,17 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     /**
      * init reconnect thread
      * 线程池中运行一个不断重连的线程
+     * 
+     * 连接的时候如果有重连配置，启动该线程，该线程内部判断是否已经连接 断开连接时调用连接方法
+     * 线程池定时去调用线程
+     * econnectExecutorFuture的判断保证只执行一次（重连情况下）
+     * 正常循环任务会在isConnected中退出不会重连 
      */
     private synchronized void initConnectStatusCheckCommand(){
         //reconnect=false to close reconnect 
         int reconnect = getReconnectParam(getUrl());
         //如果有重连时间 也就是url中reconnect!=false 并且没有运行重连进程运行
-        //reconnectExecutorFuture的判断保证只执行一次（正常情况下）
+        //reconnectExecutorFuture的判断保证只执行一次（重连情况下）
         if(reconnect > 0 && (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled())){
             Runnable connectStatusCheckCommand =  new Runnable() {//这个线程监听连接 如果断了调用方法去重连 否则只是记录最后连接时间
                 public void run() {
@@ -197,7 +203,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     private synchronized void destroyConnectStatusCheckCommand(){
         try {
             if (reconnectExecutorFuture != null && ! reconnectExecutorFuture.isDone()){
-                reconnectExecutorFuture.cancel(true);
+                reconnectExecutorFuture.cancel(true);//取消检查连接及重连的任务线程
                 reconnectExecutorService.purge();
             }
         } catch (Throwable e) {

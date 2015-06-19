@@ -25,7 +25,7 @@ import com.alibaba.dubbo.remoting.transport.MultiMessageHandler;
 
 /**
  * @author chao.liuc
- *
+ * 对handler进行包装的工具类
  */
 public class ChannelHandlers {
 

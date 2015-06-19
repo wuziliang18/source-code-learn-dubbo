@@ -111,7 +111,9 @@ public class DefaultFuture implements ResponseFuture {
         }
         return returnFromResponse();
     }
-    
+    /**
+     * ?为什么不在此处对lock解锁 唤醒get 
+     */
     public void cancel(){
         Response errorResult = new Response(id);
         errorResult.setErrorMessage("request future has been canceled.");
@@ -149,7 +151,7 @@ public class DefaultFuture implements ResponseFuture {
         }
     }
     /**
-     * 回调
+     * 执行回调
      * @param c
      */
     private void invokeCallback(ResponseCallback c){
@@ -236,7 +238,11 @@ public class DefaultFuture implements ResponseFuture {
     public static boolean hasFuture(Channel channel) {
         return CHANNELS.containsValue(channel);
     }
-
+    /**
+     * 标记已经发送出请求
+     * @param channel
+     * @param request
+     */
     public static void sent(Channel channel, Request request) {
         DefaultFuture future = FUTURES.get(request.getId());
         if (future != null) {
@@ -248,7 +254,7 @@ public class DefaultFuture implements ResponseFuture {
         sent = System.currentTimeMillis();
     }
     /**
-     * 似乎是等待触发后去给response赋值 然后唤起可能存在的get等待
+     * 等待触发后去给response赋值 然后唤起可能存在的get等待
      * @param channel
      * @param response
      */

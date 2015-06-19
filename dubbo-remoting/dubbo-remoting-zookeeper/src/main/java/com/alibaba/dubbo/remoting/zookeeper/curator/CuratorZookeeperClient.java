@@ -29,6 +29,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
 	public CuratorZookeeperClient(URL url) {
 		super(url);
 		try {
+			//构建者模式
 			Builder builder = CuratorFrameworkFactory.builder()
 					.connectString(url.getBackupAddress())
 			        .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))  //重试策略

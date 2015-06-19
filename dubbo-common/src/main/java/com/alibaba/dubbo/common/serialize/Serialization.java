@@ -34,14 +34,14 @@ public interface Serialization {
 
     /**
      * get content type id
-     * 
+     * 序列化方案的id
      * @return content type id
      */
     byte getContentTypeId();
 
     /**
      * get content type
-     * 
+     * 序列化方案的简单描述
      * @return content type
      */
     String getContentType();

@@ -78,7 +78,7 @@ public final class MultiMessage implements Iterable {
     }
 
     public Collection removeMessages() {
-        Collection result = Collections.unmodifiableCollection(messages);
+        Collection result = Collections.unmodifiableCollection(messages);//应该是防止被修改 返回的还是空的数组
         messages.clear();
         return result;
     }
