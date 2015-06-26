@@ -38,7 +38,7 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
  */
 @Sharable//注解@Sharable可以让它在多个ChannelHandler间共享
 public class NettyHandler extends SimpleChannelHandler {
-	//key是客户端的ip+端口 对客户端来说是没有意义的 只会有一个
+	//key是客户端的ip+端口 正常来说对客户端来说是没有意义的 只会有一个,多个connection时候才有意义
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>(); // <ip:port, channel>
     
     private final URL url;
