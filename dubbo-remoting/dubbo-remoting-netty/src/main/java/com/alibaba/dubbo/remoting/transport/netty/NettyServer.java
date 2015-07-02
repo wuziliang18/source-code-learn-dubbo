@@ -75,7 +75,7 @@ public class NettyServer extends AbstractServer implements Server {
         ChannelFactory channelFactory = new NioServerSocketChannelFactory(boss, worker, getUrl().getPositiveParameter(Constants.IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS));
         bootstrap = new ServerBootstrap(channelFactory);
         
-        final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
+        final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);//共享的handler
         channels = nettyHandler.getChannels();
         // https://issues.jboss.org/browse/NETTY-365
         // https://issues.jboss.org/browse/NETTY-379

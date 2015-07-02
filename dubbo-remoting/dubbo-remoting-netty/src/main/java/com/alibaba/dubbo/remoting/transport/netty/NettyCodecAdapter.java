@@ -108,7 +108,8 @@ final class NettyCodecAdapter {
             }
 
             com.alibaba.dubbo.remoting.buffer.ChannelBuffer message;
-            if (buffer.readable()) {//这逼地方永远进不来呀不明白
+            //下边的if else是把netty里的buffer 读取到dubbo的buffer中
+            if (buffer.readable()) {//这地方debug永远进不来呀不明白 wuzl应该是上次解码的时候没有读取完 留到这次
                 if (buffer instanceof DynamicChannelBuffer) {
                     buffer.writeBytes(input.toByteBuffer());
                     message = buffer;
@@ -138,7 +139,7 @@ final class NettyCodecAdapter {
                         buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
                         throw e;
                     }
-                    if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) {
+                    if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) {//需要读取更多  还原之前读的位置
                         message.readerIndex(saveReaderIndex);
                         break;
                     } else {
