@@ -28,7 +28,11 @@ import com.alibaba.dubbo.rpc.service.EchoService;
  * @author william.liangf
  */
 public abstract class AbstractProxyFactory implements ProxyFactory {
-
+	/**
+	 * 检查验证与拼接接口数组
+	 * 默认所有服务要实现EchoService
+	 * 
+	 */
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
         Class<?>[] interfaces = null;
         String config = invoker.getUrl().getParameter("interfaces");

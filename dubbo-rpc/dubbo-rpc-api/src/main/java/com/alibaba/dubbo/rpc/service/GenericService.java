@@ -17,7 +17,9 @@ package com.alibaba.dubbo.rpc.service;
 
 /**
  * 通用服务接口
- * 
+ * 泛接口调用方式主要用于客户端没有API接口及模型类元的情况，
+ * 参数及返回值中的所有POJO均用Map表示，通常用于框架集成，
+ * 比如：实现一个通用的服务测试框架，可通过GenericService调用所有服务实现。
  * @author william.liangf
  * @export
  */

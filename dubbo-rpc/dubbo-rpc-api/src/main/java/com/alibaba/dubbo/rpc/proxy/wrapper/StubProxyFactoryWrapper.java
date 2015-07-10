@@ -58,7 +58,7 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
         T proxy = proxyFactory.getProxy(invoker);
-        if (GenericService.class != invoker.getInterface()) {//如果是泛化的
+        if (GenericService.class != invoker.getInterface()) {//如果不是泛化的
             String stub = invoker.getUrl().getParameter(Constants.STUB_KEY, invoker.getUrl().getParameter(Constants.LOCAL_KEY));
             if (ConfigUtils.isNotEmpty(stub)) {
                 Class<?> serviceType = invoker.getInterface();
@@ -76,14 +76,14 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
                     }
                     try {
                         Constructor<?> constructor = ReflectUtils.findConstructor(stubClass, serviceType);
-                        proxy = (T) constructor.newInstance(new Object[] {proxy});
+                        proxy = (T) constructor.newInstance(new Object[] {proxy});//实际调用的service实现（本地伪装）
                         //export stub service
                         URL url = invoker.getUrl();
                         if (url.getParameter(Constants.STUB_EVENT_KEY, Constants.DEFAULT_STUB_EVENT)){
                             url = url.addParameter(Constants.STUB_EVENT_METHODS_KEY, StringUtils.join(Wrapper.getWrapper(proxy.getClass()).getDeclaredMethodNames(), ","));
                             url = url.addParameter(Constants.IS_SERVER_KEY, Boolean.FALSE.toString());
                             try{
-                                export(proxy, (Class)invoker.getInterface(), url);// 此处不太懂 可能是客户端独享的
+                                export(proxy, (Class)invoker.getInterface(), url);// 暴露一个本地存根的service
                             }catch (Exception e) {
                                 LOGGER.error("export a stub service error.", e);
                             }
@@ -103,7 +103,13 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException {
         return proxyFactory.getInvoker(proxy, type, url);
     }
-    
+    /**
+     * 暴漏本地存根的服务 实际调用的是本地sub服务
+     * @param instance
+     * @param type
+     * @param url
+     * @return
+     */
     private <T> Exporter<T> export(T instance, Class<T> type, URL url) {
         return protocol.export(proxyFactory.getInvoker(instance, type, url));
     }
