@@ -33,7 +33,7 @@ import com.alibaba.dubbo.common.utils.ReflectUtils;
 
 /**
  * Wrapper.
- * 
+ * 每个service 的每个方法包装
  * @author qian.lei
  */
 
@@ -71,12 +71,14 @@ public abstract class Wrapper
 
 	/**
 	 * get wrapper.
-	 * 
+	 * 获取包装类 就是为了类似方法的反射调用
 	 * @param c Class instance.
 	 * @return Wrapper instance(not null).
 	 */
 	public static Wrapper getWrapper(Class<?> c)
-    {
+    {	
+		
+		//如果是动态生成的类 直接返回Object的包装类
         while( ClassGenerator.isDynamicClass(c) ) // can not wrapper on dynamic class.
             c = c.getSuperclass();
 

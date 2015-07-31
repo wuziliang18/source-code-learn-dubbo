@@ -156,6 +156,7 @@ public abstract class Proxy
 				if( !Modifier.isPublic(ics[i].getModifiers()) )
 				{
 					String npkg = ics[i].getPackage().getName();
+					//如果接口非public的 要在同一包下 否则报错
 					if( pkg == null )
 					{
 						pkg = npkg;
@@ -170,6 +171,7 @@ public abstract class Proxy
 
 				for( Method method : ics[i].getMethods() )//方法的处理
 				{
+					//下边应该是为了防止重复的接口方法 对实际的代码生成没有影响
 					String desc = ReflectUtils.getDesc(method);//获取方法描述
 					if( worked.contains(desc) )
 						continue;
@@ -178,7 +180,7 @@ public abstract class Proxy
 					int ix = methods.size();//标记当前方法在列表中的位置
 					Class<?> rt = method.getReturnType();
 					Class<?>[] pts = method.getParameterTypes();
-
+					//调用handler去真正的处理逻辑 返回值
 					StringBuilder code = new StringBuilder("Object[] args = new Object[").append(pts.length).append("];");
 					for(int j=0;j<pts.length;j++)
 						code.append(" args[").append(j).append("] = ($w)$").append(j+1).append(";");
