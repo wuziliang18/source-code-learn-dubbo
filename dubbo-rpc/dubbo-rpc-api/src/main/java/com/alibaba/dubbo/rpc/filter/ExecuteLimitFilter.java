@@ -27,7 +27,7 @@ import com.alibaba.dubbo.rpc.RpcStatus;
 
 /**
  * ThreadLimitInvokerFilter
- * 服务端计数
+ * 服务端计数 配置RpcStatus
  * @author william.liangf
  */
 @Activate(group = Constants.PROVIDER, value = Constants.EXECUTES_KEY)

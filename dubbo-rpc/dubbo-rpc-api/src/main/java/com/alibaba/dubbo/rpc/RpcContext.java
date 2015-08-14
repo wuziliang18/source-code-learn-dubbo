@@ -48,6 +48,7 @@ public class RpcContext {
 	private static final ThreadLocal<RpcContext> LOCAL = new ThreadLocal<RpcContext>() {
 		@Override
 		protected RpcContext initialValue() {
+			//如果当前线程没有 重新生成一个并且绑定 也就是或get的时候如果为空触发该方法
 			return new RpcContext();
 		}
 	};

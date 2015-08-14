@@ -87,10 +87,10 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
     public <T> Invoker<T> refer(final Class<T> type, final URL url) throws RpcException {
         final Invoker<T> tagert = proxyFactory.getInvoker(doRefer(type, url), type, url);
         Invoker<T> invoker = new AbstractInvoker<T>(type, url) {
-            @Override
+        	@Override
             protected Result doInvoke(Invocation invocation) throws Throwable {
-                try {
-                    Result result = tagert.invoke(invocation);//实际调用的是从proxyFattory获取的
+            	try {
+                	Result result = tagert.invoke(invocation);//实际调用的是从proxyFattory获取的
                     Throwable e = result.getException();
                     if (e != null) {
                         for (Class<?> rpcException : rpcExceptions) {
@@ -134,5 +134,7 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
      * @throws RpcException
      */
     protected abstract <T> T doRefer(Class<T> type, URL url) throws RpcException;
-
+    public static void main(String[] args) {
+		System.out.println(2140*0.9);
+	}
 }

@@ -29,7 +29,7 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * 如果执行timeout，则log记录下，不干涉服务的运行
- * 
+ * wuzl服务端执行超时log记录
  * @author chao.liuc
  */
 @Activate(group = Constants.PROVIDER)
